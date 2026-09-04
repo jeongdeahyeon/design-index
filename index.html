@@ -349,7 +349,7 @@ const rail = document.getElementById("rail");
 const scrim = document.getElementById("scrim");
 const menuBtn = document.getElementById("menuBtn");
 let DATA = null, PROJECTS = [];
-let pi = 0, ai = 0, cat = null, ii = 0, q = "";
+let pi = 0, ai = -1, cat = null, ii = 0, q = "";
 
 loadData();
 
@@ -457,7 +457,7 @@ function buildRail() {
       `<span class="idx">${String(i + 1).padStart(2, "0")}</span>` +
       `<span class="t">${esc(p.name)}</span>` +
       `<span class="dot ${s.cls}"></span>`;
-    b.addEventListener("click", () => { pi = i; ai = 0; cat = null; ii = 0; toggleRail(false); render(); });
+    b.addEventListener("click", () => { pi = i; ai = -1; cat = null; ii = 0; toggleRail(false); render(); });
     railList.appendChild(b);
   });
 }
