@@ -167,10 +167,11 @@
   .stage {
     position: relative; background: var(--stage); border: 1px solid var(--line);
     border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
-    padding: 18px 56px; min-height: 340px;
+    padding: 10px 46px; min-height: 380px;
   }
-  .stage .frame { max-width: 100%; }
-  .stage img, .stage .frame svg { display: block; width: 100%; max-height: 60vh; object-fit: contain; }
+  .stage .frame { width: 100%; display: flex; align-items: center; justify-content: center; }
+  .stage .frame svg { display: block; width: 100%; height: auto; max-height: 74vh; }
+  .stage .frame img { display: block; max-width: 100%; max-height: 74vh; width: auto; height: auto; }
   .nav {
     position: absolute; top: 0; bottom: 0; width: 50px; border: 0; background: none;
     cursor: pointer; color: var(--graphite); display: flex; align-items: center; justify-content: center;
@@ -298,7 +299,7 @@
 
 <script>
 const PLANS = {
-  threeRoom: `<svg viewBox="0 0 820 560" role="img" aria-label="3룸 기본형 평면">
+  threeRoom: `<svg viewBox="55 32 710 472" preserveAspectRatio="xMidYMid meet" role="img" aria-label="3룸 기본형 평면">
     <rect width="820" height="560" fill="var(--stage)"/>
     <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
     <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
@@ -316,7 +317,7 @@ const PLANS = {
     <text class="pl-label" x="600" y="400">침실 2</text>
     <g transform="translate(690 430)"><circle r="15" class="pl-part"/><path class="pl-part" d="M0 -15 V15 M0 -15 L-5 -6 M0 -15 L5 -6"/><text class="pl-label" x="0" y="-22" text-anchor="middle">N</text></g>
   </svg>`,
-  openLdk: `<svg viewBox="0 0 820 560" role="img" aria-label="LDK 통합형 평면">
+  openLdk: `<svg viewBox="55 32 710 472" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LDK 통합형 평면">
     <rect width="820" height="560" fill="var(--stage)"/>
     <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
     <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
@@ -420,7 +421,7 @@ function media(src, category, caption, aria) {
   return placeholder(category, caption);
 }
 function placeholder(category, caption) {
-  return `<svg viewBox="0 0 820 560" role="img" aria-label="${esc(category)} 이미지 자리">
+  return `<svg viewBox="42 34 736 492" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(category)} 이미지 자리">
     <rect width="820" height="560" fill="var(--stage)"/>
     <rect x="60" y="50" width="700" height="460" fill="var(--sheet)" stroke="var(--line)"/>
     <text class="ph-cat" x="410" y="270" text-anchor="middle">${esc(category)}</text>
