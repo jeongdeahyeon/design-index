@@ -1,5 +1,5 @@
 {
-  "studio": "스튜디오 · 연동테스트",
+  "studio": "스튜디오",
   "gate": "9999",
 
   "_안내": "현장 하나 = projects 배열의 객체 하나. status: est(견적)/plan(계획)/build(시공중)/done(완료). images[].src 규칙 → 비우면 회색 자리표시 / \"plan:threeRoom\" 또는 \"plan:openLdk\" = 내장 스케치 / \"images/파일명.jpg\" = images 폴더에 올린 실제 파일 / \"https://...\" = 외부 이미지.",
