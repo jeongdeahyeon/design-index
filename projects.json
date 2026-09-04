@@ -1,0 +1,108 @@
+{
+  "studio": "스튜디오",
+  "gate": "9999",
+
+  "_안내": "현장 하나 = projects 배열의 객체 하나. status: est(견적)/plan(계획)/build(시공중)/done(완료). images[].src 규칙 → 비우면 회색 자리표시 / \"plan:threeRoom\" 또는 \"plan:openLdk\" = 내장 스케치 / \"images/파일명.jpg\" = images 폴더에 올린 실제 파일 / \"https://...\" = 외부 이미지.",
+
+  "projects": [
+    {
+      "name": "마포자이 2차 33평형",
+      "type": "아파트",
+      "status": "done",
+      "meta": {
+        "평형": "공급 33.52py / 전용 25.54py",
+        "위치": "서울 서초구 방배중앙로 30",
+        "교통": "2호선 방배 · 7호선 내방",
+        "구조": "우측 대칭 · 발코니 확장",
+        "담당": "김실장",
+        "기간": "2025.11 – 2026.02"
+      },
+      "cad": "drive.google.com/…/마포자이2차",
+      "note": "현관 팬트리 신설 요청. 주방 아일랜드 L=1,800 확정. 안방 붙박이장 벽면 전체.",
+      "alts": [
+        {
+          "code": "ALT-B",
+          "title": "거실 확장형",
+          "images": [
+            { "cat": "평면도", "caption": "ALT-B 전체 평면", "src": "plan:threeRoom" },
+            { "cat": "현관", "caption": "중문 + 팬트리 수납", "src": "" },
+            { "cat": "거실", "caption": "아트월 대면형 · 간접등", "src": "" },
+            { "cat": "거실", "caption": "발코니 확장부 창측", "src": "" },
+            { "cat": "주방", "caption": "ㄷ자 + 아일랜드 1,800", "src": "" },
+            { "cat": "침실", "caption": "안방 · 붙박이장 벽면", "src": "" },
+            { "cat": "드레스룸", "caption": "안방 연결 워크인", "src": "" },
+            { "cat": "욕실", "caption": "공용욕실 건식 분리", "src": "" }
+          ]
+        },
+        {
+          "code": "ALT-C",
+          "title": "3룸 유지형",
+          "images": [
+            { "cat": "평면도", "caption": "ALT-C 전체 평면", "src": "plan:openLdk" },
+            { "cat": "거실", "caption": "TV벽 매립형", "src": "" },
+            { "cat": "침실", "caption": "자녀방 2 분리", "src": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "헬리오시티 25평형",
+      "type": "아파트",
+      "status": "build",
+      "meta": {
+        "평형": "공급 25.72py / 전용 18.44py",
+        "위치": "서울 송파구 송파대로 345",
+        "교통": "8호선 송파 · 9호선 송파나루",
+        "구조": "판상형 · 3베이",
+        "담당": "김실장",
+        "기간": "2026.02 – 2026.04"
+      },
+      "cad": "drive.google.com/…/헬리오시티",
+      "note": "신혼 부부. 방 3 → 2 통합해 LDK 확장안 채택. 예산 상한 6,200만.",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "LDK 통합안",
+          "images": [
+            { "cat": "평면도", "caption": "ALT-A 전체 평면", "src": "plan:openLdk" },
+            { "cat": "거실", "caption": "주방 대면 아일랜드", "src": "" },
+            { "cat": "침실", "caption": "안방 + 미니 드레스", "src": "" }
+          ]
+        },
+        {
+          "code": "ALT-B",
+          "title": "3룸 유지안",
+          "images": [
+            { "cat": "평면도", "caption": "ALT-B 전체 평면", "src": "plan:threeRoom" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "청담동 카페 1F",
+      "type": "상가",
+      "status": "est",
+      "meta": {
+        "전용": "24py · 층고 3,900",
+        "위치": "서울 강남구 도산대로 인근",
+        "교통": "7호선 청담 13번 출구",
+        "구조": "코너 2면 개방 · 테라스 가능",
+        "담당": "박소장",
+        "기간": "미정"
+      },
+      "cad": "drive.google.com/…/청담카페",
+      "note": "16석 + 바 4석 목표. 주방 후드 위치 건물 협의 필요. 파사드 폴딩도어 검토.",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "홀 우선 배치",
+          "images": [
+            { "cat": "평면도", "caption": "ALT-A 전체 평면", "src": "plan:threeRoom" },
+            { "cat": "홀", "caption": "창측 2인석 + 중앙 4인석", "src": "" },
+            { "cat": "바", "caption": "에스프레소 바 정면", "src": "" }
+          ]
+        }
+      ]
+    }
+  ]
+}

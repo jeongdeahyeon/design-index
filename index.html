@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>레이아웃 도면 인덱스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" />
+<style>
+  :root {
+    --paper: #FAFAF8; --sheet: #FFFFFF; --stage: #E4E3DE;
+    --ink: #23262B; --graphite: #6C7178;
+    --line: #D9D7D0; --line-soft: #ECEAE3;
+    --blue: #2F4B7C; --blue-wash: #E9EEF4;
+    --amber: #9A6410; --green: #3F6B3A; --radius: 3px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15171B; --sheet: #1B1E23; --stage: #202329;
+      --ink: #E7E6E1; --graphite: #9BA0A7;
+      --line: #34373D; --line-soft: #24272C;
+      --blue: #94B3DE; --blue-wash: #1F2732;
+      --amber: #D6A24E; --green: #80B278;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15171B; --sheet: #1B1E23; --stage: #202329;
+    --ink: #E7E6E1; --graphite: #9BA0A7;
+    --line: #34373D; --line-soft: #24272C;
+    --blue: #94B3DE; --blue-wash: #1F2732;
+    --amber: #D6A24E; --green: #80B278;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "IBM Plex Sans KR", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- 잠금 화면 ---- */
+  .gate {
+    position: fixed; inset: 0; z-index: 50; background: var(--paper);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .gate form { width: 100%; max-width: 260px; text-align: center; }
+  .gate .mark {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--graphite); margin-bottom: 18px;
+  }
+  .gate h1 { font-size: 17px; font-weight: 600; margin: 0 0 16px; }
+  .gate input {
+    width: 100%; text-align: center; font: inherit; font-family: "IBM Plex Mono", monospace;
+    letter-spacing: 0.3em; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: var(--radius); background: var(--sheet); color: var(--ink);
+  }
+  .gate input:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .gate button {
+    width: 100%; margin-top: 10px; font: inherit; padding: 10px 12px; cursor: pointer;
+    border: 1px solid var(--ink); border-radius: var(--radius);
+    background: var(--ink); color: var(--paper);
+  }
+  .gate .err { color: #B4443A; font-size: 12.5px; margin-top: 10px; min-height: 16px; }
+
+  .app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
+
+  .rail {
+    border-right: 1px solid var(--line); padding: 20px 0 40px;
+    position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+  }
+  .brand { padding: 0 20px 16px; border-bottom: 1px solid var(--line-soft); }
+  .brand .name { font-weight: 600; }
+  .brand .sub {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.14em;
+    color: var(--graphite); text-transform: uppercase; margin-top: 2px;
+  }
+  .item {
+    display: grid; grid-template-columns: 26px 1fr; gap: 9px; align-items: baseline;
+    width: 100%; text-align: left; background: none; border: 0;
+    border-left: 2px solid transparent; padding: 8px 18px; cursor: pointer; color: inherit; font: inherit;
+  }
+  .item:hover { background: var(--line-soft); }
+  .item.active { border-left-color: var(--blue); background: var(--blue-wash); }
+  .item .idx { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--graphite); }
+  .item.active .idx { color: var(--blue); }
+  .item .t { font-size: 13.5px; line-height: 1.35; }
+  .item .m {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--graphite);
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+  .dot.est { background: var(--graphite); } .dot.plan { background: var(--blue); }
+  .dot.build { background: var(--amber); } .dot.done { background: var(--green); }
+
+  .main { padding: 26px clamp(18px, 4vw, 44px) 72px; max-width: 1060px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--graphite);
+  }
+  h1.title {
+    font-size: clamp(21px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01em;
+    margin: 6px 0 4px; text-wrap: balance;
+  }
+  .subline { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--graphite); margin-bottom: 18px; }
+
+  .alts { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; }
+  .alt {
+    flex: 0 0 auto; width: 128px; background: none; border: 0; padding: 0; cursor: pointer;
+    color: inherit; font: inherit; text-align: center;
+  }
+  .alt .thumb {
+    height: 84px; border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--stage); overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .alt.active .thumb { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .alt .thumb svg, .alt .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .alt .lbl {
+    display: block; margin-top: 7px; font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; letter-spacing: 0.04em; color: var(--graphite);
+  }
+  .alt.active .lbl { color: var(--blue); font-weight: 500; }
+  .alt .lbl small { display: block; font-family: "IBM Plex Sans KR", sans-serif; letter-spacing: 0; font-size: 11px; margin-top: 1px; }
+
+  .stage {
+    position: relative; background: var(--stage); border: 1px solid var(--line);
+    border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+    padding: 18px 56px; min-height: 320px;
+  }
+  .stage .frame { max-width: 100%; }
+  .stage img, .stage .frame svg { display: block; width: 100%; max-height: 56vh; object-fit: contain; }
+  .nav {
+    position: absolute; top: 0; bottom: 0; width: 50px; border: 0; background: none;
+    cursor: pointer; color: var(--graphite); display: flex; align-items: center; justify-content: center;
+  }
+  .nav:hover:not(:disabled) { color: var(--ink); }
+  .nav:disabled { opacity: 0.25; cursor: default; }
+  .nav.prev { left: 0; } .nav.next { right: 0; }
+  .nav svg { width: 22px; height: 22px; }
+  .counter {
+    position: absolute; right: 12px; bottom: 10px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--graphite);
+    background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 1px 7px;
+  }
+  .caption { font-size: 13.5px; color: var(--graphite); margin: 10px 2px 0; }
+  .caption b { color: var(--ink); font-weight: 500; }
+
+  .cats { display: flex; gap: 4px; flex-wrap: wrap; margin: 18px 0 12px; }
+  .cat {
+    background: none; border: 0; border-bottom: 2px solid transparent; padding: 5px 9px;
+    cursor: pointer; color: var(--graphite); font: inherit; font-size: 13.5px;
+  }
+  .cat:hover { color: var(--ink); }
+  .cat.active { color: var(--ink); border-bottom-color: var(--blue); font-weight: 500; }
+
+  .strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .frameless {
+    flex: 0 0 auto; width: 108px; height: 72px; padding: 0; cursor: pointer;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--stage); overflow: hidden;
+  }
+  .frameless.active { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .frameless svg, .frameless img { width: 100%; height: 100%; object-fit: cover; }
+
+  .titleblock {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--line-soft); overflow: hidden;
+  }
+  .cell { padding: 11px 13px 12px; background: var(--sheet); }
+  .cell.wide { grid-column: span 2; }
+  .cell .k {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--graphite); display: block; margin-bottom: 3px;
+  }
+  .cell .v { font-size: 14px; }
+  .cell .v.num { font-family: "IBM Plex Mono", monospace; }
+  .link { color: var(--blue); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--blue) 40%, transparent); }
+  .note { display: flex; gap: 10px; font-size: 13.5px; color: var(--graphite); padding: 14px 2px 0; line-height: 1.55; }
+  .note .k {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; flex: 0 0 auto; padding-top: 2px;
+  }
+
+  .ph-cat { fill: var(--graphite); font-family: "IBM Plex Sans KR", sans-serif; font-size: 30px; font-weight: 600; }
+  .ph-cap { fill: var(--graphite); font-family: "IBM Plex Sans KR", sans-serif; font-size: 15px; }
+  .ph-tag { fill: var(--graphite); font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; }
+  .pl-wall { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: miter; }
+  .pl-part { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+  .pl-label { fill: var(--graphite); font-family: "IBM Plex Mono", monospace; font-size: 14px; }
+  .pl-dimtext { fill: var(--blue); font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .pl-dim { stroke: var(--blue); stroke-width: 1; }
+
+  .msg { padding: 60px 24px; text-align: center; color: var(--graphite); font-size: 14px; }
+
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
+
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .rail { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 14px 0 10px; }
+    .rail-list { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 8px; }
+    .item {
+      flex: 0 0 auto; width: auto; grid-template-columns: auto; border-left: 0;
+      border-bottom: 2px solid transparent; border-radius: var(--radius);
+      background: var(--line-soft); padding: 7px 12px;
+    }
+    .item.active { border-left: 0; border-bottom-color: var(--blue); }
+    .item .idx, .item .m { display: none; }
+    .item .t { white-space: nowrap; font-size: 13px; }
+    .stage { padding: 12px 44px; }
+  }
+  @media (max-width: 520px) { .titleblock { grid-template-columns: repeat(2, 1fr); } }
+  @media (prefers-reduced-motion: no-preference) {
+    .fade { animation: fade 0.2s ease both; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <form id="gateForm">
+    <div class="mark">Layout Index</div>
+    <h1>비밀번호를 입력하세요</h1>
+    <input id="gateInput" type="password" inputmode="numeric" autocomplete="off" aria-label="비밀번호" autofocus />
+    <button type="submit">열기</button>
+    <div class="err" id="gateErr" aria-live="polite"></div>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+  <nav class="rail" aria-label="현장 목록">
+    <div class="brand">
+      <div class="name" id="studioName">스튜디오</div>
+      <div class="sub">Client reference</div>
+    </div>
+    <div class="rail-list" id="railList"></div>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+const PLANS = {
+  threeRoom: `<svg viewBox="0 0 820 560" role="img" aria-label="3룸 기본형 평면">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
+    <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
+    <text class="pl-dimtext" x="410" y="52" text-anchor="middle">12,600</text>
+    <rect x="90" y="80" width="640" height="400" fill="var(--sheet)"/>
+    <rect x="90" y="80" width="640" height="400" class="pl-wall"/>
+    <rect x="98" y="88" width="330" height="220" fill="color-mix(in srgb, var(--blue) 7%, var(--sheet))"/>
+    <rect x="428" y="88" width="180" height="150" fill="color-mix(in srgb, var(--amber) 9%, var(--sheet))"/>
+    <path class="pl-part" d="M428 80 V308 M90 308 H428 M608 80 V308 M428 238 H730 M300 308 V480 M520 308 V480"/>
+    <text class="pl-label" x="150" y="200">거실</text>
+    <text class="pl-label" x="470" y="170">주방·식당</text>
+    <text class="pl-label" x="650" y="170">현관</text>
+    <text class="pl-label" x="160" y="400">안방</text>
+    <text class="pl-label" x="380" y="400">욕실</text>
+    <text class="pl-label" x="600" y="400">침실 2</text>
+    <g transform="translate(690 430)"><circle r="15" class="pl-part"/><path class="pl-part" d="M0 -15 V15 M0 -15 L-5 -6 M0 -15 L5 -6"/><text class="pl-label" x="0" y="-22" text-anchor="middle">N</text></g>
+  </svg>`,
+  openLdk: `<svg viewBox="0 0 820 560" role="img" aria-label="LDK 통합형 평면">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
+    <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
+    <text class="pl-dimtext" x="410" y="52" text-anchor="middle">13,100</text>
+    <rect x="90" y="80" width="640" height="400" fill="var(--sheet)"/>
+    <rect x="90" y="80" width="640" height="400" class="pl-wall"/>
+    <rect x="98" y="88" width="420" height="392" fill="color-mix(in srgb, var(--blue) 7%, var(--sheet))"/>
+    <path class="pl-part" d="M518 80 V320 M518 320 H730 M624 320 V480"/>
+    <path class="pl-part" d="M250 360 H518" stroke-dasharray="6 5"/>
+    <text class="pl-label" x="230" y="230">통합 LDK</text>
+    <text class="pl-label" x="230" y="430">서재·홈오피스</text>
+    <text class="pl-label" x="580" y="210">안방</text>
+    <text class="pl-label" x="648" y="410">드레스룸</text>
+    <g transform="translate(690 430)"><circle r="15" class="pl-part"/><path class="pl-part" d="M0 -15 V15 M0 -15 L-5 -6 M0 -15 L5 -6"/><text class="pl-label" x="0" y="-22" text-anchor="middle">N</text></g>
+  </svg>`
+};
+
+const STATUS = {
+  est:   { label: "견적",   cls: "est" },
+  plan:  { label: "계획",   cls: "plan" },
+  build: { label: "시공중", cls: "build" },
+  done:  { label: "완료",   cls: "done" }
+};
+
+const SKEY = "layout-index-unlocked";
+const gate = document.getElementById("gate");
+const app = document.getElementById("app");
+let DATA = null, PROJECTS = [];
+let pi = 0, ai = 0, cat = null, ii = 0;
+
+/* ---------- 부팅 ---------- */
+loadData();
+
+async function loadData() {
+  try {
+    const res = await fetch("projects.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    DATA = await res.json();
+  } catch (e) {
+    gate.innerHTML = '<div class="msg">projects.json 을 불러오지 못했습니다.<br>파일이 저장소에 올라갔는지 확인하세요.</div>';
+    return;
+  }
+  PROJECTS = DATA.projects || [];
+  document.getElementById("studioName").textContent = DATA.studio || "스튜디오";
+  const pass = String(DATA.gate ?? "9999");
+
+  if (sessionStorage.getItem(SKEY) === "1") { unlock(); return; }
+
+  document.getElementById("gateForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = document.getElementById("gateInput").value.trim();
+    if (v === pass) { sessionStorage.setItem(SKEY, "1"); unlock(); }
+    else {
+      document.getElementById("gateErr").textContent = "비밀번호가 맞지 않습니다.";
+      document.getElementById("gateInput").select();
+    }
+  });
+}
+
+function unlock() {
+  gate.hidden = true;
+  app.hidden = false;
+  buildRail();
+  render();
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input, textarea") || ai === -1) return;
+    const list = filtered();
+    if (e.key === "ArrowLeft" && ii > 0) { ii--; render(); }
+    if (e.key === "ArrowRight" && ii < list.length - 1) { ii++; render(); }
+  });
+}
+
+/* ---------- 헬퍼 ---------- */
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function media(src, category, caption, aria) {
+  if (src && src.startsWith("plan:")) return PLANS[src.slice(5)] || placeholder(category, caption);
+  if (src) return `<img src="${esc(src)}" alt="${esc(aria || caption)}" loading="lazy" />`;
+  return placeholder(category, caption);
+}
+function placeholder(category, caption) {
+  return `<svg viewBox="0 0 820 560" role="img" aria-label="${esc(category)} 이미지 자리">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <rect x="60" y="50" width="700" height="460" fill="var(--sheet)" stroke="var(--line)"/>
+    <text class="ph-cat" x="410" y="270" text-anchor="middle">${esc(category)}</text>
+    <text class="ph-cap" x="410" y="304" text-anchor="middle">${esc(caption)}</text>
+    <text class="ph-tag" x="410" y="474" text-anchor="middle">이미지 자리 · 실제 이미지로 교체</text>
+  </svg>`;
+}
+function thumb(src, category, caption) { return media(src, category, caption, caption); }
+
+/* ---------- 렌더 ---------- */
+function buildRail() {
+  const railList = document.getElementById("railList");
+  railList.innerHTML = "";
+  PROJECTS.forEach((p, i) => {
+    const s = STATUS[p.status] || STATUS.plan;
+    const b = document.createElement("button");
+    b.className = "item" + (i === pi ? " active" : "");
+    b.innerHTML =
+      `<span class="idx">${String(i + 1).padStart(2, "0")}</span>` +
+      `<span><span class="t">${esc(p.name)}</span>` +
+      `<span class="m"><span class="dot ${s.cls}"></span>${s.label} · ${esc(p.type || "")}</span></span>`;
+    b.addEventListener("click", () => { pi = i; ai = 0; cat = null; ii = 0; render(); });
+    railList.appendChild(b);
+  });
+}
+
+function filtered() {
+  const alt = PROJECTS[pi].alts[ai];
+  return cat ? alt.images.filter((x) => x.cat === cat) : alt.images;
+}
+
+function render() {
+  const main = document.getElementById("main");
+  const p = PROJECTS[pi];
+  document.querySelectorAll(".item").forEach((el, i) => el.classList.toggle("active", i === pi));
+
+  const metaLine = Object.values(p.meta || {}).slice(0, 3).join("  ·  ");
+  let html =
+    `<div class="fade">` +
+    `<div class="eyebrow">${String(pi + 1).padStart(2, "0")} / ${String(PROJECTS.length).padStart(2, "0")}${p.type ? " · " + esc(p.type) : ""}</div>` +
+    `<h1 class="title">${esc(p.name)}</h1>` +
+    `<div class="subline">${esc(metaLine)}</div>`;
+
+  html += `<div class="alts">`;
+  html += `<button class="alt${ai === -1 ? " active" : ""}" data-a="-1">` +
+    `<span class="thumb"><svg viewBox="0 0 128 84"><rect width="128" height="84" fill="var(--sheet)"/>` +
+    `<rect x="26" y="16" width="76" height="52" fill="none" stroke="var(--ink)" stroke-width="2"/>` +
+    `<path d="M64 16v52M26 42h76" stroke="var(--ink)" stroke-width="1"/></svg></span>` +
+    `<span class="lbl">도면정보</span></button>`;
+  (p.alts || []).forEach((alt, i) => {
+    const first = alt.images[0] || { src: "", cat: "", caption: alt.code };
+    html += `<button class="alt${ai === i ? " active" : ""}" data-a="${i}">` +
+      `<span class="thumb">${thumb(first.src, first.cat, alt.code)}</span>` +
+      `<span class="lbl">${esc(alt.code)}<small>${esc(alt.title || "")}</small></span></button>`;
+  });
+  html += `</div>`;
+
+  if (ai === -1) {
+    html += `<div class="titleblock">` +
+      Object.entries(p.meta || {}).map(([k, v], idx) =>
+        `<div class="cell${idx === 0 ? " wide" : ""}"><span class="k">${esc(k)}</span><span class="v num">${esc(v)}</span></div>`
+      ).join("") +
+      (p.cad ? `<div class="cell wide"><span class="k">원본 CAD</span><a class="link" href="https://${esc(p.cad)}" target="_blank" rel="noopener">${esc(p.cad)} ↗</a></div>` : "") +
+      `</div>` +
+      (p.note ? `<div class="note"><span class="k">Note</span><span>${esc(p.note)}</span></div>` : "");
+    main.innerHTML = html + `</div>`;
+    bindAlts();
+    return;
+  }
+
+  const alt = p.alts[ai];
+  const list = filtered();
+  if (ii >= list.length) ii = 0;
+  const cur = list[ii] || { src: "", cat: "", caption: "" };
+
+  html += `<div class="stage">` +
+    `<button class="nav prev" id="prev" aria-label="이전" ${ii === 0 ? "disabled" : ""}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>` +
+    `<div class="frame">${media(cur.src, cur.cat, cur.caption)}</div>` +
+    `<button class="nav next" id="next" aria-label="다음" ${ii >= list.length - 1 ? "disabled" : ""}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>` +
+    `<span class="counter">${ii + 1} / ${list.length}</span>` +
+    `</div>` +
+    `<div class="caption"><b>${esc(cur.cat)}</b> &nbsp;${esc(cur.caption)}</div>`;
+
+  const cats = [...new Set(alt.images.map((x) => x.cat))];
+  html += `<div class="cats"><button class="cat${cat === null ? " active" : ""}" data-c="">전체</button>`;
+  cats.forEach((c) => { html += `<button class="cat${cat === c ? " active" : ""}" data-c="${esc(c)}">${esc(c)}</button>`; });
+  html += `</div>`;
+
+  html += `<div class="strip">`;
+  list.forEach((im, i) => {
+    html += `<button class="frameless${i === ii ? " active" : ""}" data-i="${i}" aria-label="${esc(im.caption)}">${thumb(im.src, im.cat, im.caption)}</button>`;
+  });
+  html += `</div>`;
+
+  main.innerHTML = html + `</div>`;
+
+  bindAlts();
+  document.getElementById("prev")?.addEventListener("click", () => { if (ii > 0) { ii--; render(); } });
+  document.getElementById("next")?.addEventListener("click", () => { if (ii < list.length - 1) { ii++; render(); } });
+  main.querySelectorAll(".cat").forEach((el) => el.addEventListener("click", () => { cat = el.dataset.c || null; ii = 0; render(); }));
+  main.querySelectorAll(".frameless").forEach((el) => el.addEventListener("click", () => { ii = Number(el.dataset.i); render(); }));
+}
+
+function bindAlts() {
+  document.querySelectorAll(".alt").forEach((el) => el.addEventListener("click", () => {
+    ai = Number(el.dataset.a); cat = null; ii = 0; render();
+  }));
+}
+</script>
+</body>
+</html>
