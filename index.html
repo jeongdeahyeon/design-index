@@ -65,22 +65,54 @@
   }
   .gate .err { color: #B4443A; font-size: 12.5px; margin-top: 10px; min-height: 16px; }
 
-  .app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
-
-  .rail {
-    border-right: 1px solid var(--line); padding: 20px 0 40px;
-    position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+  /* ---- 상단 바 ---- */
+  .bar {
+    position: sticky; top: 0; z-index: 15;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px clamp(16px, 4vw, 40px);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: saturate(1.1) blur(6px);
+    border-bottom: 1px solid var(--line);
   }
-  .brand { padding: 0 20px 16px; border-bottom: 1px solid var(--line-soft); }
-  .brand .name { font-weight: 600; }
-  .brand .sub {
-    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.14em;
-    color: var(--graphite); text-transform: uppercase; margin-top: 2px;
+  .bar .studio { font-weight: 600; letter-spacing: 0.01em; }
+  .bar .studio small {
+    display: block; font-family: "IBM Plex Mono", monospace; font-size: 9.5px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--graphite); margin-top: 1px;
+  }
+  .bar .spacer { flex: 1; }
+  .navbtn {
+    display: flex; align-items: center; gap: 8px; max-width: 62vw;
+    font: inherit; cursor: pointer; padding: 7px 12px;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--sheet); color: var(--ink);
+  }
+  .navbtn:hover { border-color: var(--graphite); }
+  .navbtn .lead {
+    font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--graphite); flex: 0 0 auto;
+  }
+  .navbtn .cur { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .navbtn svg { width: 14px; height: 14px; flex: 0 0 auto; color: var(--graphite); }
+
+  /* ---- 드로어(현장 목록) ---- */
+  .scrim { position: fixed; inset: 0; z-index: 18; background: transparent; }
+  .drawer {
+    position: fixed; z-index: 19;
+    top: 58px; right: clamp(10px, 3vw, 34px);
+    width: min(320px, calc(100vw - 24px)); max-height: min(72vh, 560px);
+    overflow-y: auto; background: var(--sheet);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28);
+  }
+  .drawer h2 {
+    font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--graphite);
+    margin: 0; padding: 12px 16px 6px;
   }
   .item {
     display: grid; grid-template-columns: 26px 1fr; gap: 9px; align-items: baseline;
     width: 100%; text-align: left; background: none; border: 0;
-    border-left: 2px solid transparent; padding: 8px 18px; cursor: pointer; color: inherit; font: inherit;
+    border-left: 2px solid transparent; padding: 9px 16px; cursor: pointer; color: inherit; font: inherit;
   }
   .item:hover { background: var(--line-soft); }
   .item.active { border-left-color: var(--blue); background: var(--blue-wash); }
@@ -95,7 +127,8 @@
   .dot.est { background: var(--graphite); } .dot.plan { background: var(--blue); }
   .dot.build { background: var(--amber); } .dot.done { background: var(--green); }
 
-  .main { padding: 26px clamp(18px, 4vw, 44px) 72px; max-width: 1060px; }
+  /* ---- 본문 ---- */
+  .main { max-width: 900px; margin: 0 auto; padding: 26px clamp(16px, 4vw, 40px) 80px; }
   .eyebrow {
     font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.16em;
     text-transform: uppercase; color: var(--graphite);
@@ -127,10 +160,10 @@
   .stage {
     position: relative; background: var(--stage); border: 1px solid var(--line);
     border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
-    padding: 18px 56px; min-height: 320px;
+    padding: 18px 56px; min-height: 340px;
   }
   .stage .frame { max-width: 100%; }
-  .stage img, .stage .frame svg { display: block; width: 100%; max-height: 56vh; object-fit: contain; }
+  .stage img, .stage .frame svg { display: block; width: 100%; max-height: 60vh; object-fit: contain; }
   .nav {
     position: absolute; top: 0; bottom: 0; width: 50px; border: 0; background: none;
     cursor: pointer; color: var(--graphite); display: flex; align-items: center; justify-content: center;
@@ -196,19 +229,9 @@
 
   :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
 
-  @media (max-width: 880px) {
-    .app { grid-template-columns: 1fr; }
-    .rail { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 14px 0 10px; }
-    .rail-list { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 8px; }
-    .item {
-      flex: 0 0 auto; width: auto; grid-template-columns: auto; border-left: 0;
-      border-bottom: 2px solid transparent; border-radius: var(--radius);
-      background: var(--line-soft); padding: 7px 12px;
-    }
-    .item.active { border-left: 0; border-bottom-color: var(--blue); }
-    .item .idx, .item .m { display: none; }
-    .item .t { white-space: nowrap; font-size: 13px; }
-    .stage { padding: 12px 44px; }
+  @media (max-width: 640px) {
+    .stage { padding: 10px 40px; min-height: 260px; }
+    .navbtn { max-width: 56vw; }
   }
   @media (max-width: 520px) { .titleblock { grid-template-columns: repeat(2, 1fr); } }
   @media (prefers-reduced-motion: no-preference) {
@@ -229,14 +252,23 @@
   </form>
 </div>
 
-<div class="app" id="app" hidden>
-  <nav class="rail" aria-label="현장 목록">
-    <div class="brand">
-      <div class="name" id="studioName">스튜디오</div>
-      <div class="sub">Client reference</div>
-    </div>
-    <div class="rail-list" id="railList"></div>
+<div id="app" hidden>
+  <header class="bar">
+    <div class="studio"><span id="studioName">스튜디오</span><small>Client reference</small></div>
+    <span class="spacer"></span>
+    <button class="navbtn" id="navBtn" aria-haspopup="true" aria-expanded="false" aria-controls="drawer">
+      <span class="lead">현장</span>
+      <span class="cur" id="navCurrent">—</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </header>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <nav class="drawer" id="drawer" aria-label="현장 목록" hidden>
+    <h2>현장 목록</h2>
+    <div id="railList"></div>
   </nav>
+
   <main class="main" id="main"></main>
 </div>
 
@@ -288,10 +320,12 @@ const STATUS = {
 const SKEY = "layout-index-unlocked";
 const gate = document.getElementById("gate");
 const app = document.getElementById("app");
+const drawer = document.getElementById("drawer");
+const scrim = document.getElementById("scrim");
+const navBtn = document.getElementById("navBtn");
 let DATA = null, PROJECTS = [];
 let pi = 0, ai = 0, cat = null, ii = 0;
 
-/* ---------- 부팅 ---------- */
 loadData();
 
 async function loadData() {
@@ -323,17 +357,27 @@ async function loadData() {
 function unlock() {
   gate.hidden = true;
   app.hidden = false;
-  buildRail();
+  buildDrawer();
   render();
+
+  navBtn.addEventListener("click", () => toggleDrawer());
+  scrim.addEventListener("click", () => toggleDrawer(false));
   document.addEventListener("keydown", (e) => {
-    if (e.target.matches("input, textarea") || ai === -1) return;
+    if (e.key === "Escape") { toggleDrawer(false); return; }
+    if (e.target.matches("input, textarea") || ai === -1 || !drawer.hidden) return;
     const list = filtered();
     if (e.key === "ArrowLeft" && ii > 0) { ii--; render(); }
     if (e.key === "ArrowRight" && ii < list.length - 1) { ii++; render(); }
   });
 }
 
-/* ---------- 헬퍼 ---------- */
+function toggleDrawer(open) {
+  const show = open === undefined ? drawer.hidden : open;
+  drawer.hidden = !show;
+  scrim.hidden = !show;
+  navBtn.setAttribute("aria-expanded", String(show));
+}
+
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
 function media(src, category, caption, aria) {
@@ -352,8 +396,7 @@ function placeholder(category, caption) {
 }
 function thumb(src, category, caption) { return media(src, category, caption, caption); }
 
-/* ---------- 렌더 ---------- */
-function buildRail() {
+function buildDrawer() {
   const railList = document.getElementById("railList");
   railList.innerHTML = "";
   PROJECTS.forEach((p, i) => {
@@ -364,7 +407,7 @@ function buildRail() {
       `<span class="idx">${String(i + 1).padStart(2, "0")}</span>` +
       `<span><span class="t">${esc(p.name)}</span>` +
       `<span class="m"><span class="dot ${s.cls}"></span>${s.label} · ${esc(p.type || "")}</span></span>`;
-    b.addEventListener("click", () => { pi = i; ai = 0; cat = null; ii = 0; render(); });
+    b.addEventListener("click", () => { pi = i; ai = 0; cat = null; ii = 0; toggleDrawer(false); render(); });
     railList.appendChild(b);
   });
 }
@@ -377,6 +420,7 @@ function filtered() {
 function render() {
   const main = document.getElementById("main");
   const p = PROJECTS[pi];
+  document.getElementById("navCurrent").textContent = p.name;
   document.querySelectorAll(".item").forEach((el, i) => el.classList.toggle("active", i === pi));
 
   const metaLine = Object.values(p.meta || {}).slice(0, 3).join("  ·  ");
