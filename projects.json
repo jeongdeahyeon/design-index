@@ -106,7 +106,11 @@
             }
           ]
         }
-      ]
+      ],
+      "cover": {
+        "src": "images/노형e편한세상-노형대림-cover-mtmltuot.jpg",
+        "caption": ""
+      }
     },
     {
       "name": "헬리오시티 25평형",
