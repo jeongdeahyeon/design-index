@@ -356,6 +356,11 @@ function renderEditor() {
     </div>
 
     <div class="sec">
+      <h3>도면정보 도면 <span class="tag">도면정보 탭 상단에 크게 표시 · 없으면 표만</span></h3>
+      <div id="coverBox"></div>
+    </div>
+
+    <div class="sec">
       <h3>도면안</h3>
       <div id="altList"></div>
       <button class="mini" id="addAlt">+ 도면안 추가</button>
@@ -371,7 +376,35 @@ function renderEditor() {
   };
 
   renderKv(p);
+  renderCover(p);
   renderAlts(p);
+}
+
+function imgPreview(src) {
+  if (src && src.startsWith("http")) return `<img src="${escapeAttr(src)}" alt="" />`;
+  if (src && src.startsWith("plan:")) return "내장 스케치";
+  if (src) return `<img src="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${src.split("/").map(encodeURIComponent).join("/")}" alt="" />`;
+  return "이미지 없음";
+}
+
+function renderCover(p) {
+  p.cover = p.cover || { src: "", caption: "" };
+  const c = p.cover;
+  $("coverBox").innerHTML = `
+    <div class="img">
+      <div class="prev">${imgPreview(c.src)}</div>
+      <div class="meta">
+        <div><label>설명 (선택)</label><input value="${escapeAttr(c.caption || "")}" id="coverCap" placeholder="예: 전체 평면 · 발코니 확장 반영" /></div>
+        <div class="src">src: ${escapeHtml(c.src || "(없음)")}</div>
+        <div class="imgact">
+          <button class="mini" id="coverUp">이미지 업로드</button>
+          <button class="mini danger" id="coverClear">제거</button>
+        </div>
+      </div>
+    </div>`;
+  $("coverCap").addEventListener("input", (e) => { c.caption = e.target.value; markDirty(); });
+  $("coverClear").onclick = () => { c.src = ""; markDirty(); renderCover(p); };
+  $("coverUp").onclick = () => pickAndUpload(p, c, () => renderCover(p));
 }
 
 function renderKv(p) {
@@ -464,7 +497,7 @@ function renderImgRow(p, alt, im, ii) {
 }
 
 /* ---------- 이미지 업로드 ---------- */
-function pickAndUpload(p, im) {
+function pickAndUpload(p, im, after) {
   const inp = document.createElement("input");
   inp.type = "file"; inp.accept = "image/*";
   inp.onchange = async () => {
@@ -472,7 +505,7 @@ function pickAndUpload(p, im) {
     busy(true, "이미지 준비 중…");
     try {
       const { blob, ext } = await shrinkImage(file);
-      const base = slug(p.name + "-" + (im.cat || "img")) || "img";
+      const base = slug(p.name + "-" + (im.cat || "cover")) || "img";
       const filename = `${base}-${Date.now().toString(36)}.${ext}`;
       const path = `images/${filename}`;
       busy(true, "GitHub에 올리는 중…");
@@ -484,7 +517,8 @@ function pickAndUpload(p, im) {
       if (r.status === 403) throw new Error("업로드 실패 (403): 토큰에 쓰기 권한이 없습니다. Contents: Read and write 로 토큰을 다시 만드세요.");
       if (!r.ok) throw new Error("업로드 실패 (" + r.status + "): " + (await ghMsg(r)));
       im.src = path;
-      markDirty(); renderAlts(data.projects[sel]);
+      markDirty();
+      if (after) after(); else renderAlts(data.projects[sel]);
       setState('이미지 올림 — "저장" 눌러 반영', "dirty");
     } catch (e) { alert(e.message); }
     finally { busy(false); }

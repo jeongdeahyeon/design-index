@@ -482,11 +482,14 @@ function render() {
     `<h1 class="title">${esc(p.name)}</h1>` +
     `<div class="subline">${esc(metaLine)}</div>`;
 
+  const coverSrc = p.cover && p.cover.src ? p.cover.src : "";
   html += `<div class="alts">`;
   html += `<button class="alt${ai === -1 ? " active" : ""}" data-a="-1">` +
-    `<span class="thumb"><svg viewBox="0 0 128 84"><rect width="128" height="84" fill="var(--sheet)"/>` +
-    `<rect x="26" y="16" width="76" height="52" fill="none" stroke="var(--ink)" stroke-width="2"/>` +
-    `<path d="M64 16v52M26 42h76" stroke="var(--ink)" stroke-width="1"/></svg></span>` +
+    `<span class="thumb">${coverSrc
+      ? thumb(coverSrc, "도면정보", "도면정보")
+      : `<svg viewBox="0 0 128 84"><rect width="128" height="84" fill="var(--sheet)"/>` +
+        `<rect x="26" y="16" width="76" height="52" fill="none" stroke="var(--ink)" stroke-width="2"/>` +
+        `<path d="M64 16v52M26 42h76" stroke="var(--ink)" stroke-width="1"/></svg>`}</span>` +
     `<span class="lbl">도면정보</span></button>`;
   (p.alts || []).forEach((alt, i) => {
     const first = alt.images[0] || { src: "", cat: "", caption: alt.code };
@@ -497,6 +500,13 @@ function render() {
   html += `</div>`;
 
   if (ai === -1) {
+    if (coverSrc) {
+      html += `<div class="stage" style="margin-bottom:16px">` +
+        `<div class="frame">${media(coverSrc, "도면", (p.cover && p.cover.caption) || "전체 도면")}</div></div>`;
+      if (p.cover && p.cover.caption) {
+        html += `<div class="caption" style="margin:-6px 2px 16px"><b>전체 도면</b> &nbsp;${esc(p.cover.caption)}</div>`;
+      }
+    }
     html += `<div class="titleblock">` +
       Object.entries(p.meta || {}).map(([k, v], idx) =>
         `<div class="cell${idx === 0 ? " wide" : ""}"><span class="k">${esc(k)}</span><span class="v num">${esc(v)}</span></div>`
