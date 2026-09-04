@@ -321,7 +321,7 @@ function renderList() {
 $("addProject").onclick = () => {
   data.projects.push({
     name: "새 현장", type: "아파트", status: "plan",
-    meta: { "평형": "", "위치": "", "담당": "" }, cad: "", note: "",
+    meta: { "평형": "", "위치": "", "구조": "" }, cad: "", note: "",
     alts: [{ code: "ALT-A", title: "", images: [{ cat: "평면도", caption: "", src: "" }] }]
   });
   sel = data.projects.length - 1;
@@ -505,8 +505,9 @@ function pickAndUpload(p, im, after) {
     busy(true, "이미지 준비 중…");
     try {
       const { blob, ext } = await shrinkImage(file);
-      const base = slug(p.name + "-" + (im.cat || "cover")) || "img";
-      const filename = `${base}-${Date.now().toString(36)}.${ext}`;
+      // 파일명은 항상 ASCII (한글 파일명은 GitHub Pages에서 404 남)
+      const base = (slug(im.cat || "") || "img").replace(/[^a-z0-9-]/g, "");
+      const filename = `${base || "img"}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`;
       const path = `images/${filename}`;
       busy(true, "GitHub에 올리는 중…");
       const content = await blobToBase64(blob);
@@ -546,7 +547,7 @@ function blobToBase64(blob) {
 }
 function slug(s) {
   return String(s).trim().toLowerCase()
-    .replace(/[^\w가-힣]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24);
 }
 
 /* ---------- 저장 ---------- */
