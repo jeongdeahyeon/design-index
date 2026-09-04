@@ -16,7 +16,16 @@ https://jeongdeahyeon.github.io/design-index/
 | `projects.json` | **현장 데이터 — 여기를 고침** |
 | `images/` | 도면·렌더 이미지 파일 |
 
-## 현장 추가하기
+## 관리자 페이지 (권장)
+
+https://jeongdeahyeon.github.io/design-index/admin.html
+
+- 비밀번호(`9999`) → GitHub 토큰 입력 → 편집
+- 현장/도면안/이미지 텍스트 수정, 이미지 드래그 업로드(자동 압축), 순서 변경, 삭제
+- **저장** 누르면 저장소에 커밋됨 (1~2분 뒤 뷰어 반영)
+- 토큰 만드는 법은 관리자 페이지 안 "토큰 만드는 법" 참고. 토큰은 이 브라우저에만 저장됨.
+
+## 손으로 고치기 (관리자 페이지 없이)
 
 1. `projects.json` 을 GitHub 웹에서 열고 연필(✏️) 아이콘 클릭
 2. `projects` 배열에 객체 하나 추가 (기존 항목 복사해서 수정하면 쉬움)
@@ -27,13 +36,6 @@ https://jeongdeahyeon.github.io/design-index/
    - `"images/마포자이_거실.jpg"` → images 폴더에 올린 실제 파일
    - `"https://..."` → 외부 이미지 링크
 5. Commit changes
-
-## 이미지 올리기
-
-1. `images` 폴더로 이동 → **Add file → Upload files**
-2. 파일 드래그 (웹용으로 압축한 JPG 권장, 긴 변 2000px 정도)
-3. Commit
-4. `projects.json` 의 해당 `src` 를 `"images/올린파일명.jpg"` 로 수정
 
 ## 비밀번호 바꾸기
 
