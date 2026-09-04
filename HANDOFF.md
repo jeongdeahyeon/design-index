@@ -110,6 +110,26 @@
 5. 커밋 후 반영까지 1~2분. 뷰어는 새로고침 필요(캐시). 확인 시 `?v=날짜` 쿼리로 캐시 우회.
 6. 저장소가 public이라 비밀번호 `9999`는 **눈속임 수준**(소스에 노출됨). 진짜 비공개 필요하면 private repo + Cloudflare Pages + Access로 이전.
 
+## 7-B. 내 GitHub 계정에서 처음부터 돌리기 (독립 복사본)
+
+이 뷰어를 **본인 GitHub 계정**에 그대로 세팅하는 방법. 원본 저장소(jeongdeahyeon) 접근 불필요.
+
+1. github.com 로그인 → **New repository** → 이름 자유(예: `layout-index`) → **Public** → Create
+2. 4개 파일을 그 저장소에 올림 (웹에서 Add file → Create new file / Upload files):
+   `index.html`, `admin.html`, `projects.json`, 그리고 `images/` 폴더 (아무 파일이나 하나 넣어 폴더 생성)
+   — 이 문서 부록 A·B·C 에 전체 소스가 있음
+3. 저장소 **Settings → Pages** → Source: **Deploy from a branch** → `main` / `/ (root)` → Save
+4. 1~2분 뒤 `https://<내아이디>.github.io/<저장소명>/` 접속 (비번 `9999`)
+5. 관리자(`/admin.html`)용 fine-grained 토큰 발급:
+   Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate
+   → Repository access: **Only select repositories → 그 저장소**
+   → Permissions → **Contents: Read and write**
+   → 생성된 `github_pat_...` 를 관리자 페이지에 붙여넣기
+
+**중요:** `admin.html`은 `OWNER`/`REPO`를 **페이지 URL에서 자동 감지**한다 (`<owner>.github.io/<repo>/`).
+따라서 코드 수정 없이 누구의 GitHub에서든 동작한다. (로컬 파일 등 감지 실패 시에만 스크립트 상단 기본값 사용)
+`index.html`은 상대경로만 쓰므로 원래부터 저장소 독립적.
+
 ## 8. 변경하는 법
 
 - **데이터만** (현장/이미지 추가·수정): `projects.json` 편집 (+ 필요 시 `images/`에 ASCII 파일명으로 이미지 추가) → commit → push

@@ -141,11 +141,12 @@
     <div style="margin-top:10px"><button type="submit" class="primary">연결</button></div>
     <details class="help">
       <summary>토큰 만드는 법</summary>
+      <p style="margin:0 0 4px">연결할 저장소: <code id="repoHint"></code></p>
       <ol>
         <li>github.com → 우측 상단 프로필 → <b>Settings</b></li>
         <li>맨 아래 <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b></li>
         <li><b>Generate new token</b></li>
-        <li>Repository access → <b>Only select repositories</b> → <b>design-index</b> 선택</li>
+        <li>Repository access → <b>Only select repositories</b> → <b>위 저장소</b> 선택</li>
         <li>Permissions → Repository permissions → <b>Contents</b> 를 <b>Read and write</b> 로</li>
         <li>Generate token → <code>github_pat_...</code> 복사해서 위에 붙여넣기</li>
       </ol>
@@ -183,10 +184,15 @@
 <div class="busy" id="busy" hidden>처리 중…</div>
 
 <script>
-const OWNER = "jeongdeahyeon";
-const REPO = "design-index";
+// 저장소 = 이 페이지가 올라간 GitHub Pages 주소에서 자동 감지.
+//   <owner>.github.io/<repo>/admin.html  →  OWNER=<owner>, REPO=<repo>
+// 다른 사람이 자기 GitHub 에 복사해서 써도 수정 불필요.
+// (로컬 파일 등으로 감지 실패 시 아래 기본값 사용 — 필요하면 여기만 바꾸세요)
+const _host = location.hostname;
+const OWNER = _host.endsWith(".github.io") ? _host.replace(".github.io", "") : "jeongdeahyeon";
+const REPO = location.pathname.split("/").filter(Boolean)[0] || "design-index";
 const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
-const TKEY = "design-index-gh-token";
+const TKEY = `gh-token-${OWNER}-${REPO}`;
 const SKEY = "design-index-admin-unlocked";
 const STATUS_OPTS = [["est","견적"],["plan","계획"],["build","시공중"],["done","완료"]];
 const CAT_SUGGEST = ["평면도","현관","복도","거실","주방","침실","드레스룸","욕실","발코니","서재","다용도실","현장사진"];
@@ -201,6 +207,8 @@ const $ = (id) => document.getElementById(id);
 const busy = (on, msg) => { const b = $("busy"); b.hidden = !on; if (msg) b.textContent = msg; };
 const setState = (t, cls) => { const s = $("state"); s.textContent = t; s.className = "state" + (cls ? " " + cls : ""); };
 const markDirty = () => { dirty = true; setState("저장 안 됨", "dirty"); };
+
+$("repoHint").textContent = `${OWNER}/${REPO}`;
 
 /* ---------- 잠금 ---------- */
 if (sessionStorage.getItem(SKEY) === "1") { $("gate").hidden = true; boot(); }
@@ -218,7 +226,8 @@ $("gateForm").addEventListener("submit", async (e) => {
 
 /* ---------- 부팅 ---------- */
 async function boot() {
-  token = localStorage.getItem(TKEY);
+  token = localStorage.getItem(TKEY) || localStorage.getItem("design-index-gh-token"); // 구버전 키 마이그레이션
+  if (token) localStorage.setItem(TKEY, token);
   if (!token) { $("tokenView").hidden = false; return; }
   busy(true, "토큰 확인 중…");
   try {
@@ -243,7 +252,7 @@ $("tokenForm").addEventListener("submit", async (e) => {
   try {
     const r = await fetch(API, { headers: gh(t) });
     if (r.status === 401) throw new Error("토큰이 유효하지 않거나 만료됐습니다.");
-    if (r.status === 404 || r.status === 403) throw new Error("이 토큰이 design-index 저장소에 접근할 수 없습니다. 토큰 만들 때 Repository access → Only select repositories → design-index 를 골랐는지 확인하세요.");
+    if (r.status === 404 || r.status === 403) throw new Error(`이 토큰이 ${OWNER}/${REPO} 저장소에 접근할 수 없습니다. 토큰 만들 때 Repository access → Only select repositories → ${REPO} 를 골랐는지 확인하세요.`);
     if (!r.ok) throw new Error("확인 실패 (" + r.status + ").");
     const repo = await r.json();
     if (!repo.permissions || repo.permissions.push !== true) {
@@ -566,7 +575,7 @@ async function save() {
       alert("저장소가 그 사이 변경됐습니다. 새로고침 후 다시 시도하세요.");
       return;
     }
-    if (r.status === 403) throw new Error("저장 실패 (403): 토큰에 쓰기 권한이 없습니다.\n토큰을 지우고 다시 만드세요 — Repository access는 'Only select repositories → design-index', Permissions는 'Contents: Read and write'.\n그다음 '연결 해제' 후 새 토큰 입력.");
+    if (r.status === 403) throw new Error(`저장 실패 (403): 토큰에 쓰기 권한이 없습니다.\n토큰을 지우고 다시 만드세요 — Repository access는 'Only select repositories → ${REPO}', Permissions는 'Contents: Read and write'.\n그다음 '연결 해제' 후 새 토큰 입력.`);
     if (!r.ok) throw new Error("저장 실패 (" + r.status + "): " + (await ghMsg(r)));
     const j = await r.json();
     jsonSha = j.content.sha;
