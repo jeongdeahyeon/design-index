@@ -24,38 +24,43 @@
               "src": "images/img-mu27gb3an4zw.jpg"
             },
             {
-              "cat": "메인컷",
-              "caption": "아트월 대면형 · 간접등",
+              "cat": "실사",
+              "caption": "",
               "src": "images/img-mu27me2j0wzb.jpg"
             },
             {
+              "cat": "실사",
+              "caption": "",
+              "src": "images/img-mu2fl1td0y0n.jpg"
+            },
+            {
               "cat": "현관",
-              "caption": "현관집내부시야",
+              "caption": "",
               "src": "images/img-mu2angsx8gjs.jpg"
             },
             {
               "cat": "현관",
-              "caption": "현관입구시야",
+              "caption": "",
               "src": "images/img-mu2anmtzb5r4.jpg"
             },
             {
               "cat": "거실",
-              "caption": "거실",
+              "caption": "",
               "src": "images/img-mu2aaox0ewh0.jpg"
             },
             {
               "cat": "거실",
-              "caption": "파티션신설",
+              "caption": "",
               "src": "images/img-mu2aaw9rc4au.jpg"
             },
             {
               "cat": "거실",
-              "caption": "파티션신설",
+              "caption": "",
               "src": "images/img-mu2ab320h7vl.jpg"
             },
             {
               "cat": "주방",
-              "caption": "공용욕실 건식 분리",
+              "caption": "",
               "src": "images/img-mu2abnfx90ni.jpg"
             },
             {
@@ -221,11 +226,6 @@
               "src": ""
             }
           ]
-        },
-        {
-          "code": "ALT-D",
-          "title": "",
-          "images": []
         }
       ],
       "cover": {
