@@ -15,18 +15,18 @@
       "note": "현관 팬트리 신설 요청. 주방 아일랜드 L=1,800 확정. 안방 붙박이장 벽면 전체.",
       "alts": [
         {
-          "code": "ALT-B",
+          "code": "ALT-A",
           "title": "거실 확장형",
           "images": [
             {
               "cat": "평면도",
               "caption": "ALT-B 전체 평면",
-              "src": "plan:threeRoom"
+              "src": "images/img-mu27gb3an4zw.jpg"
             },
             {
-              "cat": "현관",
-              "caption": "중문 + 팬트리 수납",
-              "src": ""
+              "cat": "거실",
+              "caption": "거실",
+              "src": "images/img-mu27gpfuidvx.jpg"
             },
             {
               "cat": "거실",
