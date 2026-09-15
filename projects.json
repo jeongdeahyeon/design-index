@@ -107,27 +107,87 @@
         },
         {
           "code": "ALT-C",
-          "title": "3룸 유지형",
+          "title": "대면형주방(뚱냉)",
           "images": [
             {
               "cat": "평면도",
-              "caption": "ALT-C 전체 평면",
-              "src": "plan:openLdk"
+              "caption": "",
+              "src": "images/img-mu2cbstdwpts.jpg"
+            },
+            {
+              "cat": "현관",
+              "caption": "",
+              "src": "images/img-mu2ccatkcw3w.jpg"
+            },
+            {
+              "cat": "현관",
+              "caption": "",
+              "src": "images/img-mu2cch6p94wf.jpg"
+            },
+            {
+              "cat": "주방",
+              "caption": "",
+              "src": "images/img-mu2ccvx142ni.jpg"
+            },
+            {
+              "cat": "주방",
+              "caption": "",
+              "src": "images/img-mu2cd3g3sk14.jpg"
+            },
+            {
+              "cat": "주방발코니",
+              "caption": "",
+              "src": "images/img-mu2cd96xdulq.jpg"
             },
             {
               "cat": "거실",
-              "caption": "TV벽 매립형",
-              "src": ""
+              "caption": "",
+              "src": "images/img-mu2cddf3dri0.jpg"
             },
             {
-              "cat": "침실",
-              "caption": "자녀방 2 분리",
+              "cat": "거실",
+              "caption": "",
+              "src": "images/img-mu2cdoqo4mso.jpg"
+            },
+            {
+              "cat": "거실",
+              "caption": "",
+              "src": "images/img-mu2cdrx50zvw.jpg"
+            },
+            {
+              "cat": "안방",
+              "caption": "",
+              "src": "images/img-mu2ce80x7s8k.jpg"
+            },
+            {
+              "cat": "안방",
+              "caption": "",
+              "src": "images/img-mu2cec4gvho8.jpg"
+            },
+            {
+              "cat": "거실욕실",
+              "caption": "",
+              "src": "images/img-mu2cfglxf3uj.jpg"
+            },
+            {
+              "cat": "거실욕실",
+              "caption": "",
+              "src": "images/img-mu2cfjwkoilp.jpg"
+            },
+            {
+              "cat": "안방욕실",
+              "caption": "",
+              "src": "images/img-mu2cfqanvmia.jpg"
+            },
+            {
+              "cat": "평면도",
+              "caption": "",
               "src": ""
             }
           ]
         },
         {
-          "code": "ALT-A",
+          "code": "ALT-B",
           "title": "",
           "images": [
             {
