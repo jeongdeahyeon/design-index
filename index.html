@@ -172,6 +172,20 @@
   .stage .frame { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   .stage .frame svg { display: block; width: 100%; height: 100%; }
   .stage .frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .pdf-embed { position: relative; width: 100%; height: 100%; background: var(--sheet); border: 1px solid var(--line); }
+  .pdf-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .pdf-embed .pdf-open {
+    position: absolute; right: 8px; bottom: 8px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 2px;
+    padding: 3px 9px; color: var(--blue); text-decoration: none;
+  }
+  .pdf-thumb {
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; background: var(--sheet); color: var(--graphite);
+  }
+  .pdf-thumb svg { width: 20px; height: 20px; }
+  .pdf-thumb span { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 0.1em; }
   .nav {
     position: absolute; top: 0; bottom: 0; width: 50px; border: 0; background: none;
     cursor: pointer; color: var(--graphite); display: flex; align-items: center; justify-content: center;
@@ -415,8 +429,16 @@ function toggleRail(open) {
 
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
+function isPdf(src) { return /\.pdf(\?|$)/i.test(src || ""); }
+
 function media(src, category, caption, aria) {
   if (src && src.startsWith("plan:")) return PLANS[src.slice(5)] || placeholder(category, caption);
+  if (src && isPdf(src)) {
+    return `<div class="pdf-embed">` +
+      `<iframe src="${esc(src)}" title="${esc(aria || caption)}" loading="lazy"></iframe>` +
+      `<a class="pdf-open" href="${esc(src)}" target="_blank" rel="noopener">PDF 새 탭에서 열기 ↗</a>` +
+      `</div>`;
+  }
   if (src) return `<img src="${esc(src)}" alt="${esc(aria || caption)}" loading="lazy" />`;
   return placeholder(category, caption);
 }
@@ -429,7 +451,15 @@ function placeholder(category, caption) {
     <text class="ph-tag" x="410" y="474" text-anchor="middle">이미지 자리 · 실제 이미지로 교체</text>
   </svg>`;
 }
-function thumb(src, category, caption) { return media(src, category, caption, caption); }
+function pdfTile() {
+  return `<div class="pdf-thumb" aria-hidden="true">` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>` +
+    `<span>PDF</span></div>`;
+}
+function thumb(src, category, caption) {
+  if (src && isPdf(src)) return pdfTile();
+  return media(src, category, caption, caption);
+}
 
 function buildRail() {
   const railList = document.getElementById("railList");

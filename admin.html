@@ -111,6 +111,10 @@
     font-size:10px; color:var(--graphite); text-align:center;
   }
   .img .prev img { width:100%; height:100%; object-fit:cover; }
+  .pdf-badge {
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.06em;
+    border:1px solid var(--line); border-radius:2px; padding:3px 9px; color:var(--graphite);
+  }
   .img .meta > div { margin-bottom:6px; }
   .img .imgact { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .img .src { font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--graphite); word-break:break-all; }
@@ -389,11 +393,14 @@ function renderEditor() {
   renderAlts(p);
 }
 
+function isPdf(src) { return /\.pdf(\?|$)/i.test(src || ""); }
+
 function imgPreview(src) {
-  if (src && src.startsWith("http")) return `<img src="${escapeAttr(src)}" alt="" />`;
-  if (src && src.startsWith("plan:")) return "내장 스케치";
-  if (src) return `<img src="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${src.split("/").map(encodeURIComponent).join("/")}" alt="" />`;
-  return "이미지 없음";
+  if (!src) return "이미지 없음";
+  if (src.startsWith("plan:")) return "내장 스케치";
+  if (isPdf(src)) return `<span class="pdf-badge">PDF</span>`;
+  if (src.startsWith("http")) return `<img src="${escapeAttr(src)}" alt="" />`;
+  return `<img src="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${src.split("/").map(encodeURIComponent).join("/")}" alt="" />`;
 }
 
 function renderCover(p) {
@@ -406,7 +413,7 @@ function renderCover(p) {
         <div><label>설명 (선택)</label><input value="${escapeAttr(c.caption || "")}" id="coverCap" placeholder="예: 전체 평면 · 발코니 확장 반영" /></div>
         <div class="src">src: ${escapeHtml(c.src || "(없음)")}</div>
         <div class="imgact">
-          <button class="mini" id="coverUp">이미지 업로드</button>
+          <button class="mini" id="coverUp">이미지/PDF 업로드</button>
           <button class="mini danger" id="coverClear">제거</button>
         </div>
       </div>
@@ -474,10 +481,7 @@ function renderAlts(p) {
 function renderImgRow(p, alt, im, ii) {
   const row = document.createElement("div");
   row.className = "img";
-  let preview = "이미지 없음";
-  if (im.src && im.src.startsWith("plan:")) preview = "내장 스케치";
-  else if (im.src && im.src.startsWith("http")) preview = `<img src="${escapeAttr(im.src)}" alt="" />`;
-  else if (im.src) preview = `<img src="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${im.src.split("/").map(encodeURIComponent).join("/")}" alt="" />`;
+  const preview = imgPreview(im.src);
   row.innerHTML = `
     <div class="prev">${preview}</div>
     <div class="meta">
@@ -487,7 +491,7 @@ function renderImgRow(p, alt, im, ii) {
       </div>
       <div class="src">src: ${escapeHtml(im.src || "(없음)")}</div>
       <div class="imgact">
-        <button class="mini" data-im="upload">이미지 업로드</button>
+        <button class="mini" data-im="upload">이미지/PDF 업로드</button>
         <button class="mini" data-im="clear">src 비우기</button>
         <button class="mini" data-im="up">▲</button>
         <button class="mini" data-im="down">▼</button>
@@ -508,12 +512,18 @@ function renderImgRow(p, alt, im, ii) {
 /* ---------- 이미지 업로드 ---------- */
 function pickAndUpload(p, im, after) {
   const inp = document.createElement("input");
-  inp.type = "file"; inp.accept = "image/*";
+  inp.type = "file"; inp.accept = "image/*,application/pdf";
   inp.onchange = async () => {
     const file = inp.files[0]; if (!file) return;
-    busy(true, "이미지 준비 중…");
+    const isPdfFile = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    if (isPdfFile && file.size > 20 * 1024 * 1024) {
+      alert("PDF가 너무 큽니다 (" + Math.round(file.size / 1024 / 1024) + "MB, 최대 20MB). 압축하거나 페이지를 나눠서 올려주세요.");
+      return;
+    }
+    busy(true, isPdfFile ? "PDF 준비 중…" : "이미지 준비 중…");
     try {
-      const { blob, ext } = await shrinkImage(file);
+      // PDF는 압축(캔버스 렌더링) 없이 원본 그대로 업로드
+      const { blob, ext } = isPdfFile ? { blob: file, ext: "pdf" } : await shrinkImage(file);
       // 파일명은 항상 ASCII (한글 파일명은 GitHub Pages에서 404 남)
       const base = (slug(im.cat || "") || "img").replace(/[^a-z0-9-]/g, "");
       const filename = `${base || "img"}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`;
