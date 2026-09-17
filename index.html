@@ -115,6 +115,12 @@
     text-transform: uppercase; color: var(--graphite); padding: 8px 12px 4px;
   }
   .rail-list { flex: 1; padding-bottom: 20px; }
+  .rail-foot { padding: 10px 14px; border-top: 1px solid var(--line-soft); }
+  .admin-link {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em;
+    color: var(--graphite); text-decoration: none;
+  }
+  .admin-link:hover { color: var(--ink); }
   .rail-empty { padding: 16px 12px; font-size: 12px; color: var(--graphite); text-align: center; }
 
   .item {
@@ -305,6 +311,7 @@
       </div>
       <div class="rail-count" id="railCount"></div>
       <div class="rail-list" id="railList"></div>
+      <div class="rail-foot"><a class="admin-link" href="admin.html">⚙ 관리자</a></div>
     </aside>
 
     <main class="main" id="main"></main>
