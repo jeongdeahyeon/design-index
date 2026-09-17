@@ -232,50 +232,6 @@
         "src": "images/img-mu26x194o89p.jpg",
         "caption": ""
       }
-    },
-    {
-      "name": "새 현장",
-      "type": "아파트",
-      "status": "plan",
-      "meta": {
-        "평형": "",
-        "위치": "",
-        "구조": ""
-      },
-      "cad": "",
-      "note": "",
-      "alts": [
-        {
-          "code": "ALT-A",
-          "title": "대면형",
-          "images": [
-            {
-              "cat": "평면도",
-              "caption": "",
-              "src": ""
-            },
-            {
-              "cat": "거실",
-              "caption": "",
-              "src": ""
-            },
-            {
-              "cat": "안방",
-              "caption": "",
-              "src": ""
-            },
-            {
-              "cat": "주방",
-              "caption": "",
-              "src": ""
-            }
-          ]
-        }
-      ],
-      "cover": {
-        "src": "",
-        "caption": ""
-      }
     }
   ]
 }
