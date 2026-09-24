@@ -181,11 +181,35 @@
   .pdf-embed { position: relative; width: 100%; height: 100%; background: var(--sheet); border: 1px solid var(--line); }
   .pdf-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
   .pdf-embed .pdf-open {
-    position: absolute; right: 8px; bottom: 8px;
+    position: absolute; right: 8px; bottom: 8px; z-index: 2;
     font-family: "IBM Plex Mono", monospace; font-size: 11px;
     background: var(--paper); border: 1px solid var(--line); border-radius: 2px;
     padding: 3px 9px; color: var(--blue); text-decoration: none;
   }
+  .pdf-zoom {
+    position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%;
+    background: transparent; border: 0; padding: 0; cursor: zoom-in;
+    display: flex; align-items: flex-end; justify-content: flex-start;
+  }
+  .pdf-zoom span {
+    margin: 8px; padding: 3px 10px; border-radius: 2px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em;
+    background: var(--ink); color: var(--paper); opacity: 0.85;
+  }
+  .pdf-zoom:hover span { opacity: 1; }
+  .pdf-lightbox {
+    position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    background: rgba(10, 11, 13, 0.94);
+  }
+  .pdf-lb-bar { display: flex; align-items: center; gap: 14px; padding: 10px 16px; color: #E7E6E1; font-size: 13px; }
+  .pdf-lb-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pdf-lb-bar a { color: #94B3DE; text-decoration: none; font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .pdf-lb-bar button {
+    background: transparent; color: #E7E6E1; border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 3px; padding: 5px 12px; cursor: pointer; font: inherit; font-size: 12.5px;
+  }
+  .pdf-lb-bar button:hover { border-color: #fff; }
+  .pdf-lightbox iframe { flex: 1; width: 100%; border: 0; background: #2a2a2a; }
   .pdf-thumb {
     width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 3px; background: var(--sheet); color: var(--graphite);
@@ -301,6 +325,15 @@
     <div class="studio"><span id="studioName">스튜디오</span><small>Client reference</small></div>
     <span class="cur" id="navCurrent"></span>
   </header>
+
+  <div class="pdf-lightbox" id="pdfLightbox" hidden role="dialog" aria-modal="true" aria-label="PDF 크게 보기">
+    <div class="pdf-lb-bar">
+      <span class="pdf-lb-title" id="pdfLbTitle"></span>
+      <a id="pdfLbOpen" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
+      <button type="button" id="pdfLbClose">닫기 ✕</button>
+    </div>
+    <iframe id="pdfLbFrame" title="PDF 크게 보기"></iframe>
+  </div>
 
   <div class="scrim" id="scrim" hidden></div>
 
@@ -430,13 +463,35 @@ function unlock() {
     if (e.key === "Enter") { e.preventDefault(); document.querySelector("#railList .item")?.click(); }
   });
 
+  document.addEventListener("click", (e) => {
+    const z = e.target.closest(".pdf-zoom");
+    if (z) openPdf(z.dataset.pdf, z.dataset.title);
+  });
+  document.getElementById("pdfLbClose").addEventListener("click", closePdf);
+
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { toggleRail(false); return; }
+    const lbOpen = !document.getElementById("pdfLightbox").hidden;
+    if (e.key === "Escape") { if (lbOpen) closePdf(); else toggleRail(false); return; }
+    if (lbOpen) return;
     if (e.target.matches("input, textarea") || ai === -1) return;
     const list = filtered();
     if (e.key === "ArrowLeft" && ii > 0) { ii--; render(); }
     if (e.key === "ArrowRight" && ii < list.length - 1) { ii++; render(); }
   });
+}
+
+function openPdf(src, title) {
+  document.getElementById("pdfLbTitle").textContent = title || "PDF";
+  document.getElementById("pdfLbOpen").href = src;
+  document.getElementById("pdfLbFrame").src = src + "#view=Fit";
+  document.getElementById("pdfLightbox").hidden = false;
+  document.body.style.overflow = "hidden";
+  document.getElementById("pdfLbClose").focus();
+}
+function closePdf() {
+  document.getElementById("pdfLightbox").hidden = true;
+  document.getElementById("pdfLbFrame").src = "about:blank";
+  document.body.style.overflow = "";
 }
 
 function toggleRail(open) {
@@ -457,8 +512,9 @@ function media(src, category, caption, aria) {
   if (src && src.startsWith("plan:")) return PLANS[src.slice(5)] || placeholder(category, caption);
   if (src && isPdf(src)) {
     return `<div class="pdf-embed">` +
-      `<iframe src="${esc(src)}" title="${esc(aria || caption)}" loading="lazy"></iframe>` +
-      `<a class="pdf-open" href="${esc(src)}" target="_blank" rel="noopener">PDF 새 탭에서 열기 ↗</a>` +
+      `<iframe src="${esc(src)}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" title="${esc(aria || caption)}" loading="lazy" tabindex="-1"></iframe>` +
+      `<button type="button" class="pdf-zoom" data-pdf="${esc(src)}" data-title="${esc(caption || category || "PDF")}" aria-label="PDF 크게 보기"><span>크게 보기 ⤢</span></button>` +
+      `<a class="pdf-open" href="${esc(src)}" target="_blank" rel="noopener">새 탭 ↗</a>` +
       `</div>`;
   }
   if (src) return `<img src="${esc(src)}" alt="${esc(aria || caption)}" loading="lazy" />`;
