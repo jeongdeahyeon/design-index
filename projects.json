@@ -247,18 +247,18 @@
       "alts": [
         {
           "code": "ALT-A",
-          "title": "",
+          "title": "대면형",
           "images": [
             {
               "cat": "평면도",
               "caption": "",
-              "src": ""
+              "src": "images/img-muf6kytjosoc.jpg"
             }
           ]
         }
       ],
       "cover": {
-        "src": "images/img-muf5ylj2ui3x.pdf",
+        "src": "images/img-muf6lmhe3xwe.jpg",
         "caption": ""
       }
     }
