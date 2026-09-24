@@ -200,7 +200,7 @@ const TKEY = `gh-token-${OWNER}-${REPO}`;
 const SKEY = "design-index-admin-unlocked";
 const STATUS_OPTS = [["est","견적"],["plan","계획"],["build","시공중"],["done","완료"]];
 // 뷰어(index.html)가 이 순서대로 자동 정렬함 — 새 카테고리 지을 때 이 이름 그대로 쓰면 순서 신경 안 써도 됨
-const CAT_SUGGEST = ["평면도","메인컷","현관","주방","주방발코니","거실","안방","거실욕실","안방욕실","복도","드레스룸","다용도실","서재","현장사진"];
+const CAT_SUGGEST = ["평면도","실사","메인컷","현관","주방","주방발코니","거실","안방","거실욕실","안방욕실","복도","드레스룸","다용도실","서재","현장사진"];
 
 let token = null;
 let data = null;      // working copy
@@ -602,7 +602,7 @@ function escapeHtml(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&"
 function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 </script>
 <datalist id="catlist">
-  <option value="평면도"></option><option value="메인컷"></option><option value="현관"></option>
+  <option value="평면도"></option><option value="실사"></option><option value="메인컷"></option><option value="현관"></option>
   <option value="주방"></option><option value="주방발코니"></option><option value="거실"></option>
   <option value="안방"></option><option value="거실욕실"></option><option value="안방욕실"></option>
   <option value="복도"></option><option value="침실"></option><option value="드레스룸"></option>

@@ -365,7 +365,7 @@ const STATUS = {
 
 /* 카테고리 표시 순서 — 이 순서대로 항상 정렬됨. 목록에 없는 카테고리는 뒤에 가나다 역순으로.
    현장마다 매번 순서를 맞출 필요 없이, 카테고리 이름만 아래와 똑같이 붙이면 자동 정렬됨. */
-const CAT_ORDER = ["평면도", "메인컷", "현관", "주방", "주방발코니", "거실", "안방", "거실욕실", "안방욕실"];
+const CAT_ORDER = ["평면도", "실사", "메인컷", "현관", "주방", "주방발코니", "거실", "안방", "거실욕실", "안방욕실"];
 function catRank(c) { const i = CAT_ORDER.indexOf(c); return i === -1 ? null : i; }
 function sortByCat(images) {
   return [...images].sort((a, b) => {
