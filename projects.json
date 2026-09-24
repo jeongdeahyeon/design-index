@@ -232,6 +232,35 @@
         "src": "images/img-mu26x194o89p.jpg",
         "caption": ""
       }
+    },
+    {
+      "name": "노형뜨란채203동 (112타입) ",
+      "type": "아파트",
+      "status": "plan",
+      "meta": {
+        "평형": "34",
+        "위치": "제주시수덕로44",
+        "구조": ""
+      },
+      "cad": "",
+      "note": "",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "",
+          "images": [
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": ""
+            }
+          ]
+        }
+      ],
+      "cover": {
+        "src": "",
+        "caption": ""
+      }
     }
   ]
 }
