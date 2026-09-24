@@ -178,7 +178,7 @@
   .stage .frame { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   .stage .frame svg { display: block; width: 100%; height: 100%; }
   .stage .frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
-  .pdf-embed { position: relative; width: 100%; height: 100%; background: var(--sheet); border: 1px solid var(--line); }
+  .pdf-embed { position: relative; width: 100%; height: 100%; }
   .pdf-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
   .pdf-embed .pdf-open {
     position: absolute; right: 8px; bottom: 8px; z-index: 2;
@@ -512,7 +512,7 @@ function media(src, category, caption, aria) {
   if (src && src.startsWith("plan:")) return PLANS[src.slice(5)] || placeholder(category, caption);
   if (src && isPdf(src)) {
     return `<div class="pdf-embed">` +
-      `<iframe src="${esc(src)}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" title="${esc(aria || caption)}" loading="lazy" tabindex="-1"></iframe>` +
+      pdfImg(src, aria || caption) +
       `<button type="button" class="pdf-zoom" data-pdf="${esc(src)}" data-title="${esc(caption || category || "PDF")}" aria-label="PDF 크게 보기"><span>크게 보기 ⤢</span></button>` +
       `<a class="pdf-open" href="${esc(src)}" target="_blank" rel="noopener">새 탭 ↗</a>` +
       `</div>`;
@@ -535,8 +535,68 @@ function pdfTile() {
     `<span>PDF</span></div>`;
 }
 function thumb(src, category, caption) {
-  if (src && isPdf(src)) return pdfTile();
+  if (src && isPdf(src)) return pdfImg(src, caption || "PDF");
   return media(src, category, caption, caption);
+}
+
+/* PDF 첫 페이지를 이미지처럼 렌더링(pdf.js, 필요할 때만 CDN에서 로드) → 일반 이미지와 똑같은 크기·비율로 표시 */
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const pdfCache = new Map();
+const pdfPending = new Map();
+let pdfjsPromise = null;
+
+function pdfImg(src, alt) {
+  return `<img class="pdf-img" data-pdfsrc="${esc(src)}" alt="${esc(alt)}" src="${pdfCache.get(src) || BLANK_GIF}" />`;
+}
+function loadPdfJs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = PDFJS_URL;
+      s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; resolve(window.pdfjsLib); };
+      s.onerror = () => { pdfjsPromise = null; reject(new Error("pdf.js load failed")); };
+      document.head.appendChild(s);
+    });
+  }
+  return pdfjsPromise;
+}
+function renderPdfFirstPage(src) {
+  if (pdfCache.has(src)) return Promise.resolve(pdfCache.get(src));
+  if (pdfPending.has(src)) return pdfPending.get(src);
+  const p = (async () => {
+    const lib = await loadPdfJs();
+    const doc = await lib.getDocument(src).promise;
+    const page = await doc.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: Math.min(4, 1800 / base.width) });
+    const c = document.createElement("canvas");
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const url = c.toDataURL("image/jpeg", 0.88);
+    pdfCache.set(src, url);
+    return url;
+  })();
+  pdfPending.set(src, p);
+  p.finally(() => pdfPending.delete(src)).catch(() => {});
+  return p;
+}
+function hydratePdfs() {
+  const bySrc = (src) => [...document.querySelectorAll("img[data-pdfsrc]")].filter((i) => i.dataset.pdfsrc === src);
+  document.querySelectorAll("img[data-pdfsrc]").forEach((img) => {
+    const src = img.dataset.pdfsrc;
+    if (pdfCache.has(src)) { img.src = pdfCache.get(src); return; }
+    renderPdfFirstPage(src)
+      .then((url) => bySrc(src).forEach((i) => { i.src = url; }))
+      .catch(() => bySrc(src).forEach((i) => {
+        const t = document.createElement("div");
+        t.innerHTML = pdfTile();
+        i.replaceWith(t.firstChild);
+      }));
+  });
 }
 
 function buildRail() {
@@ -666,6 +726,7 @@ function bindAlts() {
   document.querySelectorAll(".alt").forEach((el) => el.addEventListener("click", () => {
     ai = Number(el.dataset.a); cat = null; ii = 0; render();
   }));
+  hydratePdfs();
 }
 </script>
 </body>
