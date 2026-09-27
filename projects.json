@@ -295,6 +295,42 @@
               "src": "images/img-muf6u5l1tjmp.jpg"
             }
           ]
+        },
+        {
+          "code": "ALT-B",
+          "title": "ㄱ자형",
+          "images": [
+            {
+              "cat": "거실",
+              "caption": "",
+              "src": "images/img-mujjg386dodt.jpg"
+            },
+            {
+              "cat": "현관",
+              "caption": "",
+              "src": "images/img-mujjgg2ewb5b.jpg"
+            },
+            {
+              "cat": "안방",
+              "caption": "",
+              "src": "images/img-mujjgjuxzmiw.jpg"
+            },
+            {
+              "cat": "현관",
+              "caption": "",
+              "src": "images/img-mujjgn0unrez.jpg"
+            },
+            {
+              "cat": "주방",
+              "caption": "",
+              "src": "images/img-mujjgsfm1zaq.jpg"
+            },
+            {
+              "cat": "복도",
+              "caption": "",
+              "src": "images/img-mujjgwlodiii.jpg"
+            }
+          ]
         }
       ],
       "cover": {
