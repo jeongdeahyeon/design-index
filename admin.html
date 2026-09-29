@@ -123,6 +123,11 @@
   .img .imgact { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .img .src { font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--graphite); word-break:break-all; }
 
+  .dropzone {
+    margin:10px 0; padding:14px; text-align:center; font-size:12px; color:var(--graphite);
+    border:1px dashed var(--line); border-radius:var(--radius); cursor:pointer; background:var(--paper);
+  }
+  .dropzone:hover, .dropzone.over { border-color:var(--blue); color:var(--blue); background:var(--blue-wash); }
   .hint { font-size:12px; color:var(--graphite); margin-top:6px; }
   .busy { position:fixed; inset:0; background:color-mix(in srgb,var(--paper) 70%, transparent); display:flex; align-items:center; justify-content:center; z-index:20; font-size:13px; }
   @media (max-width:820px){ .shell{ grid-template-columns:1fr; } .side{ min-height:0; border-right:0; border-bottom:1px solid var(--line); } }
@@ -218,6 +223,10 @@ const setState = (t, cls) => { const s = $("state"); s.textContent = t; s.classN
 const markDirty = () => { dirty = true; setState("저장 안 됨", "dirty"); };
 
 $("repoHint").textContent = `${OWNER}/${REPO}`;
+
+// 드롭존 밖에 파일을 놓았을 때 브라우저가 페이지를 열어버리는 것 방지
+window.addEventListener("dragover", (e) => e.preventDefault());
+window.addEventListener("drop", (e) => e.preventDefault());
 
 /* ---------- 잠금 ---------- */
 if (sessionStorage.getItem(SKEY) === "1") { $("gate").hidden = true; boot(); }
@@ -520,6 +529,7 @@ function renderAlts(p) {
         <button class="mini danger" data-alt="del">삭제</button>
       </div>
       <div class="imgs" data-imgs></div>
+      <div class="dropzone" data-alt-drop tabindex="0">이미지·PDF를 여기로 여러 개 드래그하면 파일명 순서대로 한번에 추가됩니다 (또는 클릭해서 선택)</div>
       <button class="mini" data-alt="addimg">+ 이미지 추가</button>
     `;
     box.querySelector('[data-alt="code"]').addEventListener("input", (e) => { alt.code = e.target.value; markDirty(); });
@@ -528,6 +538,21 @@ function renderAlts(p) {
     box.querySelector('[data-alt="down"]').onclick = () => { if (ai < p.alts.length - 1) { [p.alts[ai + 1], p.alts[ai]] = [p.alts[ai], p.alts[ai + 1]]; markDirty(); renderAlts(p); } };
     box.querySelector('[data-alt="del"]').onclick = () => { if (confirm("이 도면안을 삭제할까요?")) { p.alts.splice(ai, 1); markDirty(); renderAlts(p); } };
     box.querySelector('[data-alt="addimg"]').onclick = () => { alt.images = alt.images || []; alt.images.push({ cat: "평면도", caption: "", src: "" }); markDirty(); renderAlts(p); };
+
+    const dz = box.querySelector("[data-alt-drop]");
+    dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("over"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+    dz.addEventListener("drop", (e) => {
+      e.preventDefault(); dz.classList.remove("over");
+      if (e.dataTransfer.files.length) bulkUploadToAlt(p, alt, e.dataTransfer.files);
+    });
+    dz.addEventListener("click", () => {
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.multiple = true; inp.accept = "image/*,application/pdf";
+      inp.onchange = () => { if (inp.files.length) bulkUploadToAlt(p, alt, inp.files); };
+      inp.click();
+    });
+    dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dz.click(); } });
 
     const imgsWrap = box.querySelector("[data-imgs]");
     (alt.images || []).forEach((im, ii) => imgsWrap.appendChild(renderImgRow(p, alt, im, ii)));
@@ -570,32 +595,37 @@ function renderImgRow(p, alt, im, ii) {
 }
 
 /* ---------- 이미지 업로드 ---------- */
+
+// 파일 하나를 GitHub images/ 에 올리고 저장된 경로를 반환 (실패 시 throw)
+async function uploadOneFile(file, catHint) {
+  const isPdfFile = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  if (isPdfFile && file.size > 20 * 1024 * 1024) {
+    throw new Error(`${file.name}: PDF가 너무 큽니다 (${Math.round(file.size / 1024 / 1024)}MB, 최대 20MB). 압축하거나 페이지를 나눠서 올려주세요.`);
+  }
+  // PDF는 압축(캔버스 렌더링) 없이 원본 그대로 업로드
+  const { blob, ext } = isPdfFile ? { blob: file, ext: "pdf" } : await shrinkImage(file);
+  // 파일명은 항상 ASCII (한글 파일명은 GitHub Pages에서 404 남)
+  const base = (slug(catHint || "") || "img").replace(/[^a-z0-9-]/g, "");
+  const filename = `${base || "img"}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`;
+  const path = `images/${filename}`;
+  const content = await blobToBase64(blob);
+  const r = await fetch(`${API}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`, {
+    method: "PUT", headers: gh(),
+    body: JSON.stringify({ message: `이미지 추가: ${filename}`, content, branch: "main" })
+  });
+  if (r.status === 403) throw new Error("업로드 실패 (403): 토큰에 쓰기 권한이 없습니다. Contents: Read and write 로 토큰을 다시 만드세요.");
+  if (!r.ok) throw new Error(`${file.name}: 업로드 실패 (${r.status}) ` + (await ghMsg(r)));
+  return path;
+}
+
 function pickAndUpload(p, im, after) {
   const inp = document.createElement("input");
   inp.type = "file"; inp.accept = "image/*,application/pdf";
   inp.onchange = async () => {
     const file = inp.files[0]; if (!file) return;
-    const isPdfFile = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (isPdfFile && file.size > 20 * 1024 * 1024) {
-      alert("PDF가 너무 큽니다 (" + Math.round(file.size / 1024 / 1024) + "MB, 최대 20MB). 압축하거나 페이지를 나눠서 올려주세요.");
-      return;
-    }
-    busy(true, isPdfFile ? "PDF 준비 중…" : "이미지 준비 중…");
+    busy(true, "업로드 중…");
     try {
-      // PDF는 압축(캔버스 렌더링) 없이 원본 그대로 업로드
-      const { blob, ext } = isPdfFile ? { blob: file, ext: "pdf" } : await shrinkImage(file);
-      // 파일명은 항상 ASCII (한글 파일명은 GitHub Pages에서 404 남)
-      const base = (slug(im.cat || "") || "img").replace(/[^a-z0-9-]/g, "");
-      const filename = `${base || "img"}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`;
-      const path = `images/${filename}`;
-      busy(true, "GitHub에 올리는 중…");
-      const content = await blobToBase64(blob);
-      const r = await fetch(`${API}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`, {
-        method: "PUT", headers: gh(),
-        body: JSON.stringify({ message: `이미지 추가: ${filename}`, content, branch: "main" })
-      });
-      if (r.status === 403) throw new Error("업로드 실패 (403): 토큰에 쓰기 권한이 없습니다. Contents: Read and write 로 토큰을 다시 만드세요.");
-      if (!r.ok) throw new Error("업로드 실패 (" + r.status + "): " + (await ghMsg(r)));
+      const path = await uploadOneFile(file, im.cat);
       im.src = path;
       markDirty();
       if (after) after(); else renderAlts(data.projects[sel]);
@@ -604,6 +634,43 @@ function pickAndUpload(p, im, after) {
     finally { busy(false); }
   };
   inp.click();
+}
+
+// 파일명 기준 자연 정렬 (2.jpg 가 10.jpg 보다 앞에 오도록)
+function naturalCompare(a, b) {
+  return a.localeCompare(b, "ko", { numeric: true, sensitivity: "base" });
+}
+// 파일명에 카테고리 이름이 들어있으면 자동으로 추정(가장 긴 이름 우선), 없으면 빈 값
+function guessCatFromName(filename) {
+  const base = filename.replace(/\.[^.]+$/, "");
+  const cats = [...CAT_SUGGEST].sort((a, b) => b.length - a.length);
+  for (const c of cats) if (base.includes(c)) return c;
+  return "";
+}
+
+// 여러 파일을 파일명 순서대로 한 도면안에 일괄 업로드
+async function bulkUploadToAlt(p, alt, fileList) {
+  const files = [...fileList].filter((f) => f.type.startsWith("image/") || isPdf(f.name) || f.type === "application/pdf");
+  if (!files.length) { alert("이미지 또는 PDF 파일만 추가할 수 있습니다."); return; }
+  files.sort((a, b) => naturalCompare(a.name, b.name));
+  alt.images = alt.images || [];
+  let ok = 0;
+  const failed = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    busy(true, `업로드 중… (${i + 1}/${files.length}) ${file.name}`);
+    try {
+      const cat = guessCatFromName(file.name);
+      const path = await uploadOneFile(file, cat);
+      alt.images.push({ cat, caption: "", src: path });
+      ok++;
+    } catch (e) { failed.push(e.message); }
+  }
+  busy(false);
+  markDirty();
+  renderAlts(p);
+  setState(`이미지 ${ok}개 올림 — "저장" 눌러 반영`, "dirty");
+  if (failed.length) alert("일부 파일 업로드 실패:\n" + failed.join("\n"));
 }
 
 async function shrinkImage(file) {
