@@ -347,6 +347,35 @@
         "src": "images/img-muf6nq1381fl.pdf",
         "caption": ""
       }
+    },
+    {
+      "name": "노형그랜드치과",
+      "type": "아파트",
+      "status": "plan",
+      "meta": {
+        "평형": "90평",
+        "위치": "",
+        "구조": ""
+      },
+      "cad": "",
+      "note": "",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "랜더링",
+          "images": [
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": ""
+            }
+          ]
+        }
+      ],
+      "cover": {
+        "src": "images/img-mum1sbjn7xmx.pdf",
+        "caption": ""
+      }
     }
   ]
 }
