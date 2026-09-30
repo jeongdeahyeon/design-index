@@ -452,6 +452,7 @@ async function loadData() {
   }
   PROJECTS = DATA.projects || [];
   PROJECTS.forEach((p) => (p.alts || []).forEach((alt) => { alt.images = sortByCat(alt.images || []); }));
+  if (PROJECTS.length) pi = railOrder()[0];
   document.getElementById("studioName").textContent = DATA.studio || "스튜디오";
   const pass = String(DATA.gate ?? "9999");
 
@@ -619,13 +620,28 @@ function hydratePdfs() {
   });
 }
 
+// 같은 단지끼리 모이게: 이름에서 동·차·평형 등 숫자가 나오기 전까지를 단지 이름으로 본다.
+// (대소문자·띄어쓰기·괄호 무시 → "연동e편한세상 106동"과 "연동E편한세상 2차"가 같은 무리)
+function complexKey(name) {
+  const s = String(name || "").toLowerCase().replace(/\(.*?\)/g, "").replace(/\s+/g, "");
+  const m = s.match(/^[^0-9]+/);
+  return m ? m[0] : s;
+}
+function railOrder() {
+  return PROJECTS
+    .map((p, i) => ({ i, k: complexKey(p.name) }))
+    .sort((a, b) => a.k.localeCompare(b.k, "ko") || a.i - b.i)
+    .map((x) => x.i);
+}
+function displayNo(i) { return railOrder().indexOf(i) + 1; }
+
 function buildRail() {
   const railList = document.getElementById("railList");
   const railCount = document.getElementById("railCount");
   railList.innerHTML = "";
   const needle = q.trim().toLowerCase();
-  const rows = PROJECTS
-    .map((p, i) => ({ p, i }))
+  const rows = railOrder()
+    .map((i) => ({ p: PROJECTS[i], i }))
     .filter(({ p }) => !needle
       || (p.name || "").toLowerCase().includes(needle)
       || (p.type || "").toLowerCase().includes(needle));
@@ -640,9 +656,10 @@ function buildRail() {
     const s = STATUS[p.status] || STATUS.plan;
     const b = document.createElement("button");
     b.className = "item" + (i === pi ? " active" : "");
+    b.dataset.pi = String(i);
     b.title = `${p.name} · ${s.label}${p.type ? " · " + p.type : ""}`;
     b.innerHTML =
-      `<span class="idx">${String(i + 1).padStart(2, "0")}</span>` +
+      `<span class="idx">${String(displayNo(i)).padStart(2, "0")}</span>` +
       `<span class="t">${esc(p.name)}</span>` +
       `<span class="dot ${s.cls}"></span>`;
     b.addEventListener("click", () => {
@@ -665,13 +682,13 @@ function render() {
   if (compareMode && (!p.alts || p.alts.length < 2)) compareMode = false;
   document.getElementById("navCurrent").textContent = p.name;
   document.querySelectorAll(".item").forEach((el) => {
-    el.classList.toggle("active", Number(el.querySelector(".idx").textContent) - 1 === pi);
+    el.classList.toggle("active", Number(el.dataset.pi) === pi);
   });
 
   const metaLine = Object.values(p.meta || {}).slice(0, 3).join("  ·  ");
   let html =
     `<div class="fade">` +
-    `<div class="eyebrow">${String(pi + 1).padStart(2, "0")} / ${String(PROJECTS.length).padStart(2, "0")}${p.type ? " · " + esc(p.type) : ""}</div>` +
+    `<div class="eyebrow">${String(displayNo(pi)).padStart(2, "0")} /${String(PROJECTS.length).padStart(2, "0")}${p.type ? " · " + esc(p.type) : ""}</div>` +
     `<h1 class="title">${esc(p.name)}</h1>` +
     `<div class="subline">${esc(metaLine)}</div>`;
 
