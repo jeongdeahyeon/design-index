@@ -484,14 +484,19 @@
           "title": "",
           "images": [
             {
-              "cat": "평면도",
+              "cat": "거실",
               "caption": "",
               "src": "images/img-munp2buycnbb.jpg"
             },
             {
-              "cat": "평면도",
+              "cat": "거실",
               "caption": "",
               "src": "images/img-munp2h5upm2n.jpg"
+            },
+            {
+              "cat": "주방",
+              "caption": "",
+              "src": "images/img-munsdevmacny.jpg"
             }
           ]
         }
