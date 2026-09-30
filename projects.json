@@ -466,6 +466,40 @@
         "src": "images/img-mum1sbjn7xmx.pdf",
         "caption": ""
       }
+    },
+    {
+      "name": "연동E편한세상 2차 46평형",
+      "type": "아파트",
+      "status": "plan",
+      "meta": {
+        "평형": "46",
+        "위치": "",
+        "구조": ""
+      },
+      "cad": "",
+      "note": "",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "",
+          "images": [
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": "images/img-munp2buycnbb.jpg"
+            },
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": "images/img-munp2h5upm2n.jpg"
+            }
+          ]
+        }
+      ],
+      "cover": {
+        "src": "",
+        "caption": ""
+      }
     }
   ]
 }
