@@ -580,6 +580,35 @@
         "src": "images/img-munt2els9w1m.pdf",
         "caption": "연동대림1차 46평형 평면"
       }
+    },
+    {
+      "name": "노형아이파크 103동 (33평형)",
+      "type": "아파트",
+      "status": "plan",
+      "meta": {
+        "평형": "33",
+        "위치": "노형아이파크",
+        "구조": ""
+      },
+      "cad": "",
+      "note": "",
+      "alts": [
+        {
+          "code": "ALT-A",
+          "title": "",
+          "images": [
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": ""
+            }
+          ]
+        }
+      ],
+      "cover": {
+        "src": "images/img-muw2x72kpg5x.pdf",
+        "caption": ""
+      }
     }
   ]
 }
