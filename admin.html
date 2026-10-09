@@ -454,7 +454,10 @@ function renderPhotos(p) {
     card.querySelector("input").addEventListener("input", (e) => { ph.caption = e.target.value; markDirty(); });
     card.querySelector('[data-ph="left"]').onclick = () => { if (i > 0) { [p.photos[i - 1], p.photos[i]] = [p.photos[i], p.photos[i - 1]]; markDirty(); renderPhotos(p); } };
     card.querySelector('[data-ph="right"]').onclick = () => { if (i < p.photos.length - 1) { [p.photos[i + 1], p.photos[i]] = [p.photos[i], p.photos[i + 1]]; markDirty(); renderPhotos(p); } };
-    card.querySelector('[data-ph="del"]').onclick = () => { p.photos.splice(i, 1); markDirty(); renderPhotos(p); };
+    card.querySelector('[data-ph="del"]').onclick = () => {
+      if (!confirm("이 사진을 삭제하시겠습니까?")) return;
+      p.photos.splice(i, 1); markDirty(); renderPhotos(p);
+    };
     grid.appendChild(card);
   });
 
@@ -555,7 +558,11 @@ function renderCover(p) {
     </div>`;
   hydratePdfs();
   $("coverCap").addEventListener("input", (e) => { c.caption = e.target.value; markDirty(); });
-  $("coverClear").onclick = () => { c.src = ""; markDirty(); renderCover(p); };
+  $("coverClear").onclick = () => {
+    if (!c.src) return;
+    if (!confirm("도면정보 도면을 삭제하시겠습니까?")) return;
+    c.src = ""; markDirty(); renderCover(p);
+  };
   $("coverUp").onclick = () => pickAndUpload(p, c, () => renderCover(p));
 }
 
@@ -655,7 +662,10 @@ function renderImgRow(p, alt, im, ii) {
   row.querySelector('[data-im="cat"]').addEventListener("input", (e) => { im.cat = e.target.value; markDirty(); });
   row.querySelector('[data-im="caption"]').addEventListener("input", (e) => { im.caption = e.target.value; markDirty(); });
   row.querySelector('[data-im="clear"]').onclick = () => { im.src = ""; markDirty(); renderAlts(p); };
-  row.querySelector('[data-im="del"]').onclick = () => { alt.images.splice(ii, 1); markDirty(); renderAlts(p); };
+  row.querySelector('[data-im="del"]').onclick = () => {
+    if (!confirm("이 이미지를 삭제하시겠습니까?")) return;
+    alt.images.splice(ii, 1); markDirty(); renderAlts(p);
+  };
   row.querySelector('[data-im="up"]').onclick = () => { if (ii > 0) { [alt.images[ii - 1], alt.images[ii]] = [alt.images[ii], alt.images[ii - 1]]; markDirty(); renderAlts(p); } };
   row.querySelector('[data-im="down"]').onclick = () => { if (ii < alt.images.length - 1) { [alt.images[ii + 1], alt.images[ii]] = [alt.images[ii], alt.images[ii + 1]]; markDirty(); renderAlts(p); } };
   row.querySelector('[data-im="upload"]').onclick = () => pickAndUpload(p, im);
