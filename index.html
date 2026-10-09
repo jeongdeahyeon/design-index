@@ -175,6 +175,13 @@
   .alt.active .thumb { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
   .alt.cmp-selected .thumb { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue); }
   .alt .thumb svg, .alt .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .alt .thumb { position: relative; }
+  .folder-badge {
+    position: absolute; left: 6px; bottom: 6px; display: flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 2px; background: var(--ink); color: var(--paper);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+  }
+  .alt .thumb .folder-badge svg { width: 12px; height: 12px; }
   .alt .lbl {
     display: block; margin-top: 7px; font-family: "IBM Plex Mono", monospace;
     font-size: 11.5px; letter-spacing: 0.04em; color: var(--graphite);
@@ -671,8 +678,14 @@ function buildRail() {
   });
 }
 
+/* ai: -1 = 도면정보, -2 = 현장사진 폴더, 0.. = 도면안 */
+function curAlt() {
+  const p = PROJECTS[pi];
+  if (ai === -2) return { images: (p.photos || []).map((ph) => ({ cat: "현장사진", caption: ph.caption || "", src: ph.src })) };
+  return p.alts[ai];
+}
 function filtered() {
-  const alt = PROJECTS[pi].alts[ai];
+  const alt = curAlt();
   return cat ? alt.images.filter((x) => x.cat === cat) : alt.images;
 }
 
@@ -680,6 +693,7 @@ function render() {
   const main = document.getElementById("main");
   const p = PROJECTS[pi];
   if (compareMode && (!p.alts || p.alts.length < 2)) compareMode = false;
+  if (ai === -2 && !(p.photos && p.photos.length)) ai = -1;
   document.getElementById("navCurrent").textContent = p.name;
   document.querySelectorAll(".item").forEach((el) => {
     el.classList.toggle("active", Number(el.dataset.pi) === pi);
@@ -719,6 +733,13 @@ function render() {
       `<span class="thumb">${thumb(first.src, first.cat, alt.code)}</span>` +
       `<span class="lbl">${esc(alt.code)}<small>${esc(alt.title || "")}</small></span></button>`;
   });
+  const photos = p.photos || [];
+  if (photos.length) {
+    html += `<button class="alt${!compareMode && ai === -2 ? " active" : ""}${compareMode ? " alt-disabled" : ""}" data-a="-2">` +
+      `<span class="thumb">${thumb(photos[0].src, "현장사진", "현장사진")}` +
+      `<span class="folder-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>${photos.length}</span></span>` +
+      `<span class="lbl">현장사진<small>${photos.length}장</small></span></button>`;
+  }
   html += `</div>`;
 
   if (compareMode) {
@@ -748,7 +769,7 @@ function render() {
     return;
   }
 
-  const alt = p.alts[ai];
+  const alt = curAlt();
   const list = filtered();
   if (ii >= list.length) ii = 0;
   const cur = list[ii] || { src: "", cat: "", caption: "" };
@@ -763,10 +784,14 @@ function render() {
     `</div>` +
     `<div class="caption"><b>${esc(cur.cat)}</b> &nbsp;${esc(cur.caption)}</div>`;
 
-  const cats = [...new Set(alt.images.map((x) => x.cat))];
-  html += `<div class="cats"><button class="cat${cat === null ? " active" : ""}" data-c="">전체</button>`;
-  cats.forEach((c) => { html += `<button class="cat${cat === c ? " active" : ""}" data-c="${esc(c)}">${esc(c)}</button>`; });
-  html += `</div>`;
+  if (ai !== -2) {
+    const cats = [...new Set(alt.images.map((x) => x.cat))];
+    html += `<div class="cats"><button class="cat${cat === null ? " active" : ""}" data-c="">전체</button>`;
+    cats.forEach((c) => { html += `<button class="cat${cat === c ? " active" : ""}" data-c="${esc(c)}">${esc(c)}</button>`; });
+    html += `</div>`;
+  } else {
+    html += `<div style="height:14px"></div>`;
+  }
 
   html += `<div class="strip">`;
   list.forEach((im, i) => {
@@ -836,7 +861,7 @@ function bindAlts() {
   document.querySelectorAll(".alt").forEach((el) => el.addEventListener("click", () => {
     const i = Number(el.dataset.a);
     if (compareMode) {
-      if (i === -1) return;
+      if (i < 0) return;
       const pos = compareSel.indexOf(i);
       if (pos !== -1) { if (compareSel.length > 1) compareSel.splice(pos, 1); }
       else { if (compareSel.length >= 2) compareSel.shift(); compareSel.push(i); }
