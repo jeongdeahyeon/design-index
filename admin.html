@@ -227,11 +227,17 @@ let data = null;      // working copy
 let jsonSha = null;   // sha of projects.json for safe commit
 let sel = 0;
 let dirty = false;
+let saveTimer = null, saving = false, savePending = false;
 
 const $ = (id) => document.getElementById(id);
 const busy = (on, msg) => { const b = $("busy"); b.hidden = !on; if (msg) b.textContent = msg; };
 const setState = (t, cls) => { const s = $("state"); s.textContent = t; s.className = "state" + (cls ? " " + cls : ""); };
-const markDirty = () => { dirty = true; setState("저장 안 됨", "dirty"); };
+// 수정이 생기면 잠시 뒤 자동 저장 (입력이 멈춘 뒤 1.8초). 업로드는 바로(0.1초) 저장.
+const markDirty = () => { dirty = true; setState("저장 안 됨 · 곧 자동 저장", "dirty"); scheduleSave(1800); };
+function scheduleSave(ms) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => runSave(false), ms);
+}
 
 $("repoHint").textContent = `${OWNER}/${REPO}`;
 
@@ -691,7 +697,8 @@ function pickAndUpload(p, im, after) {
       im.src = path;
       markDirty();
       if (after) after(); else renderAlts(data.projects[sel]);
-      setState('이미지 올림 — "저장" 눌러 반영', "dirty");
+      setState("이미지 올림 · 자동 저장 중…", "dirty");
+      scheduleSave(100);
     } catch (e) { alert(e.message); }
     finally { busy(false); }
   };
@@ -731,7 +738,8 @@ async function bulkUploadToAlt(p, alt, fileList) {
   busy(false);
   markDirty();
   renderAlts(p);
-  setState(`이미지 ${ok}개 올림 — "저장" 눌러 반영`, "dirty");
+  setState(`이미지 ${ok}개 올림 · 자동 저장 중…`, "dirty");
+  scheduleSave(100);
   if (failed.length) alert("일부 파일 업로드 실패:\n" + failed.join("\n"));
 }
 
@@ -755,7 +763,8 @@ async function bulkUploadPhotos(p, fileList) {
   busy(false);
   markDirty();
   renderPhotos(p);
-  setState(`현장사진 ${ok}장 올림 — "저장" 눌러 반영`, "dirty");
+  setState(`현장사진 ${ok}장 올림 · 자동 저장 중…`, "dirty");
+  scheduleSave(100);
   if (failed.length) alert("일부 파일 업로드 실패:\n" + failed.join("\n"));
 }
 
@@ -783,29 +792,42 @@ function slug(s) {
 }
 
 /* ---------- 저장 ---------- */
-$("saveBtn").onclick = save;
-async function save() {
+$("saveBtn").onclick = () => runSave(true);
+
+async function putProjects() {
+  const snapshot = JSON.stringify(data);
+  const body = JSON.stringify({
+    message: "관리자 편집",
+    content: b64encodeUtf8(JSON.stringify(data, null, 2) + "\n"),
+    sha: jsonSha, branch: "main"
+  });
+  const r = await fetch(`${API}/contents/projects.json`, { method: "PUT", headers: gh(), body });
+  if (r.status === 409 || r.status === 422) throw new Error("저장소가 그 사이 변경됐습니다. 새로고침 후 다시 시도하세요.");
+  if (r.status === 403) throw new Error(`저장 실패 (403): 토큰에 쓰기 권한이 없습니다.\n토큰을 지우고 다시 만드세요 — Repository access는 'Only select repositories → ${REPO}', Permissions는 'Contents: Read and write'.\n그다음 '연결 해제' 후 새 토큰 입력.`);
+  if (!r.ok) throw new Error("저장 실패 (" + r.status + "): " + (await ghMsg(r)));
+  const j = await r.json();
+  jsonSha = j.content.sha;
+  // 저장하는 동안 새로 수정한 게 있으면 아직 안 저장된 것
+  dirty = JSON.stringify(data) !== snapshot;
+}
+
+// manual=true: "저장" 버튼(처리 중 화면 표시) / false: 자동 저장(조용히)
+async function runSave(manual) {
+  clearTimeout(saveTimer);
   if (!data) return;
-  busy(true, "저장 중…");
+  if (saving) { savePending = true; return; }
+  saving = true;
+  if (manual) busy(true, "저장 중…"); else setState("자동 저장 중…", "dirty");
   try {
-    const body = JSON.stringify({
-      message: "관리자 편집",
-      content: b64encodeUtf8(JSON.stringify(data, null, 2) + "\n"),
-      sha: jsonSha, branch: "main"
-    });
-    const r = await fetch(`${API}/contents/projects.json`, { method: "PUT", headers: gh(), body });
-    if (r.status === 409 || r.status === 422) {
-      alert("저장소가 그 사이 변경됐습니다. 새로고침 후 다시 시도하세요.");
-      return;
-    }
-    if (r.status === 403) throw new Error(`저장 실패 (403): 토큰에 쓰기 권한이 없습니다.\n토큰을 지우고 다시 만드세요 — Repository access는 'Only select repositories → ${REPO}', Permissions는 'Contents: Read and write'.\n그다음 '연결 해제' 후 새 토큰 입력.`);
-    if (!r.ok) throw new Error("저장 실패 (" + r.status + "): " + (await ghMsg(r)));
-    const j = await r.json();
-    jsonSha = j.content.sha;
-    dirty = false;
-    setState("저장됨 · 1~2분 뒤 뷰어 반영", "saved");
+    await putProjects();
+    if (dirty) { setState("저장 안 됨 · 곧 자동 저장", "dirty"); scheduleSave(800); }
+    else setState("저장됨 · 1~2분 뒤 뷰어 반영", "saved");
   } catch (e) { setState(e.message, "dirty"); alert(e.message); }
-  finally { busy(false); }
+  finally {
+    saving = false;
+    if (manual) busy(false);
+    if (savePending) { savePending = false; scheduleSave(300); }
+  }
 }
 
 window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });

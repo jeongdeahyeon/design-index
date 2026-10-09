@@ -109,7 +109,7 @@
   - 연결 시 `repo.permissions.push` 확인해서 쓰기 권한 없으면 거부
 - 편집 UI: 현장 목록(추가/삭제) + 폼(기본정보 / 속성 표 / 도면정보 도면 / 도면안·이미지)
 - 이미지 업로드: 클라이언트에서 canvas로 **긴 변 2000px / JPEG q0.82 압축** → `PUT contents/images/<파일명>`
-- **저장**: `projects.json`을 `sha` 대조하여 `PUT` (충돌 시 새로고침 안내)
+- **저장**: `projects.json`을 `sha` 대조하여 `PUT` (충돌 시 새로고침 안내). **자동 저장**: `markDirty()`가 입력 멈춘 1.8초 뒤 `runSave(false)` 예약, 업로드 직후는 0.1초 뒤 저장. 저장 중 추가 수정은 직전 sha를 이어받아 연속 저장(`saving`/`savePending`). "저장" 버튼은 `runSave(true)`로 즉시 저장
 - 헬퍼: `gh()`(헤더), `b64encodeUtf8`/`b64decodeUtf8`, `ghMsg()`(에러 메시지), `pickAndUpload(p, im, after)`
 
 ## 7. 규칙 / 함정 (중요)
