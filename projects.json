@@ -668,6 +668,82 @@
               "src": "images/img-muw31gv9miy2.jpg"
             }
           ]
+        },
+        {
+          "code": "ALT-B",
+          "title": "대면형 우드컨샙",
+          "images": [
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": "images/img-mv0y98ldecyt.jpg"
+            },
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": "images/img-mv0y9aj0964q.jpg"
+            },
+            {
+              "cat": "거실",
+              "caption": "",
+              "src": "images/img-mv0y9c0rxr5n.jpg"
+            },
+            {
+              "cat": "거실욕실",
+              "caption": "",
+              "src": "images/img-mv0y9djpw48x.jpg"
+            },
+            {
+              "cat": "복도",
+              "caption": "",
+              "src": "images/img-mv0y9en1nhw6.jpg"
+            },
+            {
+              "cat": "복도",
+              "caption": "",
+              "src": "images/img-mv0y9g1et7tr.jpg"
+            },
+            {
+              "cat": "평면도",
+              "caption": "",
+              "src": "images/img-mv0y9h5c75gr.jpg"
+            },
+            {
+              "cat": "안방욕실",
+              "caption": "",
+              "src": "images/img-mv0y9i7tl8tb.jpg"
+            },
+            {
+              "cat": "안방",
+              "caption": "",
+              "src": "images/img-mv0y9j8dynw7.jpg"
+            },
+            {
+              "cat": "안방",
+              "caption": "",
+              "src": "images/img-mv0y9ksbi0nn.jpg"
+            },
+            {
+              "cat": "입구방",
+              "caption": "",
+              "src": "images/img-mv0y9mavwmt1.jpg"
+            },
+            {
+              "cat": "입구방",
+              "caption": "",
+              "src": "images/img-mv0y9nt8ve0d.jpg"
+            },
+            {
+              "cat": "거실",
+              "caption": "",
+              "src": "images/img-mv0y9oylev1w.jpg"
+            },
+            {
+              "cat": "주방",
+              "caption": "",
+              "src": "images/img-mv0y9q8pt99r.jpg"
+            }
+          ]
         }
       ],
       "cover": {
