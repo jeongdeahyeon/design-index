@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>레이아웃 도면 인덱스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" />
+<style>
+  :root {
+    --paper: #FAFAF8; --sheet: #FFFFFF; --stage: #E4E3DE;
+    --ink: #23262B; --graphite: #6C7178;
+    --line: #D9D7D0; --line-soft: #ECEAE3;
+    --blue: #2F4B7C; --blue-wash: #E9EEF4;
+    --amber: #9A6410; --green: #3F6B3A; --radius: 3px;
+    --rail-w: 236px; --bar-h: 49px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15171B; --sheet: #1B1E23; --stage: #202329;
+      --ink: #E7E6E1; --graphite: #9BA0A7;
+      --line: #34373D; --line-soft: #24272C;
+      --blue: #94B3DE; --blue-wash: #1F2732;
+      --amber: #D6A24E; --green: #80B278;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15171B; --sheet: #1B1E23; --stage: #202329;
+    --ink: #E7E6E1; --graphite: #9BA0A7;
+    --line: #34373D; --line-soft: #24272C;
+    --blue: #94B3DE; --blue-wash: #1F2732;
+    --amber: #D6A24E; --green: #80B278;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "IBM Plex Sans KR", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- 잠금 화면 ---- */
+  .gate {
+    position: fixed; inset: 0; z-index: 50; background: var(--paper);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .gate form { width: 100%; max-width: 260px; text-align: center; }
+  .gate .mark {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--graphite); margin-bottom: 18px;
+  }
+  .gate h1 { font-size: 17px; font-weight: 600; margin: 0 0 16px; }
+  .gate input {
+    width: 100%; text-align: center; font: inherit; font-family: "IBM Plex Mono", monospace;
+    letter-spacing: 0.3em; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: var(--radius); background: var(--sheet); color: var(--ink);
+  }
+  .gate input:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .gate button {
+    width: 100%; margin-top: 10px; font: inherit; padding: 10px 12px; cursor: pointer;
+    border: 1px solid var(--ink); border-radius: var(--radius);
+    background: var(--ink); color: var(--paper);
+  }
+  .gate .err { color: #B4443A; font-size: 12.5px; margin-top: 10px; min-height: 16px; }
+
+  /* ---- 상단 바 ---- */
+  .bar {
+    position: sticky; top: 0; z-index: 25; height: var(--bar-h);
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 clamp(14px, 3vw, 28px);
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .menu {
+    display: none; align-items: center; justify-content: center;
+    width: 34px; height: 34px; margin-left: -6px; flex: 0 0 auto;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--sheet); color: var(--ink); cursor: pointer; padding: 0;
+  }
+  .menu svg { width: 18px; height: 18px; }
+  .bar .studio { font-weight: 600; letter-spacing: 0.01em; font-size: 14.5px; }
+  .bar .studio small {
+    font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--graphite); margin-left: 8px;
+  }
+  .bar .cur {
+    margin-left: auto; font-family: "IBM Plex Mono", monospace; font-size: 12px;
+    color: var(--graphite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw;
+  }
+
+  /* ---- 레이아웃 ---- */
+  .layout { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); }
+  .scrim { position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.32); }
+
+  .rail {
+    position: sticky; top: var(--bar-h); align-self: start;
+    height: calc(100vh - var(--bar-h)); overflow-y: auto;
+    border-right: 1px solid var(--line); background: var(--paper);
+    display: flex; flex-direction: column;
+  }
+  .rail-search {
+    position: sticky; top: 0; z-index: 1; background: var(--paper);
+    padding: 10px; border-bottom: 1px solid var(--line-soft);
+  }
+  .rail-search input {
+    width: 100%; font: inherit; font-size: 12.5px; padding: 6px 9px;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--sheet); color: var(--ink);
+  }
+  .rail-search input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .rail-count {
+    font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--graphite); padding: 8px 12px 4px;
+  }
+  .rail-list { flex: 1; padding-bottom: 20px; }
+  .rail-foot { padding: 10px 14px; border-top: 1px solid var(--line-soft); }
+  /* 고객 링크로 들어온 화면: 그 현장 하나만 — 목록·관리자 메뉴 숨김 */
+  body.share .rail, body.share .menu, body.share .scrim { display: none !important; }
+  body.share .layout { grid-template-columns: minmax(0, 1fr); }
+  .admin-link {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em;
+    color: var(--graphite); text-decoration: none;
+  }
+  .admin-link:hover { color: var(--ink); }
+  .rail-empty { padding: 16px 12px; font-size: 12px; color: var(--graphite); text-align: center; }
+
+  .item {
+    display: flex; align-items: center; gap: 7px; width: 100%; text-align: left;
+    background: none; border: 0; border-left: 2px solid transparent;
+    padding: 5px 12px 5px 10px; cursor: pointer; color: inherit; font: inherit; line-height: 1.3;
+  }
+  .item:hover { background: var(--line-soft); }
+  .item.active { border-left-color: var(--blue); background: var(--blue-wash); }
+  .item .idx { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--graphite); flex: 0 0 auto; }
+  .item.active .idx { color: var(--blue); }
+  .item .t {
+    font-size: 12.5px; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .item .dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+  .dot.est { background: var(--graphite); } .dot.plan { background: var(--blue); }
+  .dot.build { background: var(--amber); } .dot.done { background: var(--green); }
+
+  /* ---- 본문 ---- */
+  .main { max-width: 1060px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 40px) 80px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--graphite);
+  }
+  h1.title {
+    font-size: clamp(21px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01em;
+    margin: 6px 0 4px; text-wrap: balance;
+  }
+  .subline { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--graphite); margin-bottom: 18px; }
+
+  .cmpbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .cmp-toggle {
+    font: inherit; font-size: 12.5px; cursor: pointer; padding: 6px 12px;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--sheet); color: var(--ink); display: flex; align-items: center; gap: 6px;
+  }
+  .cmp-toggle:hover { border-color: var(--graphite); }
+  .cmp-toggle.active { border-color: var(--blue); color: var(--blue); background: var(--blue-wash); }
+  .cmp-hint { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--graphite); }
+
+  .alts { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; }
+  .alt {
+    flex: 0 0 auto; width: 128px; background: none; border: 0; padding: 0; cursor: pointer;
+    color: inherit; font: inherit; text-align: center;
+  }
+  .alt.alt-disabled { cursor: default; opacity: 0.45; }
+  .alt .thumb {
+    height: 84px; border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--stage); overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .alt.active .thumb { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .alt.cmp-selected .thumb { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue); }
+  .alt .thumb svg, .alt .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .alt .thumb { position: relative; }
+  .folder-badge {
+    position: absolute; left: 6px; bottom: 6px; display: flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 2px; background: var(--ink); color: var(--paper);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+  }
+  .alt .thumb .folder-badge svg { width: 12px; height: 12px; }
+  .alt .lbl {
+    display: block; margin-top: 7px; font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; letter-spacing: 0.04em; color: var(--graphite);
+  }
+  .alt.active .lbl, .alt.cmp-selected .lbl { color: var(--blue); font-weight: 500; }
+  .alt .lbl small { display: block; font-family: "IBM Plex Sans KR", sans-serif; letter-spacing: 0; font-size: 11px; margin-top: 1px; }
+
+  .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .cmp-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.04em;
+    color: var(--graphite); margin-bottom: 8px;
+  }
+  @media (max-width: 720px) { .cmp-grid { grid-template-columns: 1fr; } }
+
+  .stage {
+    position: relative; background: var(--stage); border: 1px solid var(--line);
+    border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+    padding: 12px 46px; height: min(66vh, 640px); min-height: 300px;
+  }
+  .stage .frame { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .stage .frame svg { display: block; width: 100%; height: 100%; }
+  .stage .frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .pdf-embed { position: relative; width: 100%; height: 100%; }
+  .pdf-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .pdf-embed .pdf-open {
+    position: absolute; right: 8px; bottom: 8px; z-index: 2;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 2px;
+    padding: 3px 9px; color: var(--blue); text-decoration: none;
+  }
+  .pdf-zoom {
+    position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%;
+    background: transparent; border: 0; padding: 0; cursor: zoom-in;
+    display: flex; align-items: flex-end; justify-content: flex-start;
+  }
+  .pdf-zoom span {
+    margin: 8px; padding: 3px 10px; border-radius: 2px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em;
+    background: var(--ink); color: var(--paper); opacity: 0.85;
+  }
+  .pdf-zoom:hover span { opacity: 1; }
+  .pdf-lightbox {
+    position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    background: rgba(10, 11, 13, 0.94);
+  }
+  .pdf-lb-bar { display: flex; align-items: center; gap: 14px; padding: 10px 16px; color: #E7E6E1; font-size: 13px; }
+  .pdf-lb-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pdf-lb-bar a { color: #94B3DE; text-decoration: none; font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .pdf-lb-bar button {
+    background: transparent; color: #E7E6E1; border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 3px; padding: 5px 12px; cursor: pointer; font: inherit; font-size: 12.5px;
+  }
+  .pdf-lb-bar button:hover { border-color: #fff; }
+  .pdf-lightbox iframe { flex: 1; width: 100%; border: 0; background: #2a2a2a; }
+  .pdf-thumb {
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; background: var(--sheet); color: var(--graphite);
+  }
+  .pdf-thumb svg { width: 20px; height: 20px; }
+  .pdf-thumb span { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 0.1em; }
+  .nav {
+    position: absolute; top: 0; bottom: 0; width: 50px; border: 0; background: none;
+    cursor: pointer; color: var(--graphite); display: flex; align-items: center; justify-content: center;
+  }
+  .nav:hover:not(:disabled) { color: var(--ink); }
+  .nav:disabled { opacity: 0.25; cursor: default; }
+  .nav.prev { left: 0; } .nav.next { right: 0; }
+  .nav svg { width: 22px; height: 22px; }
+  .counter {
+    position: absolute; right: 12px; bottom: 10px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--graphite);
+    background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 1px 7px;
+  }
+  .caption { font-size: 13.5px; color: var(--graphite); margin: 10px 2px 0; }
+  .caption b { color: var(--ink); font-weight: 500; }
+
+  .cats { display: flex; gap: 4px; flex-wrap: wrap; margin: 18px 0 12px; }
+  .cat {
+    background: none; border: 0; border-bottom: 2px solid transparent; padding: 5px 9px;
+    cursor: pointer; color: var(--graphite); font: inherit; font-size: 13.5px;
+  }
+  .cat:hover { color: var(--ink); }
+  .cat.active { color: var(--ink); border-bottom-color: var(--blue); font-weight: 500; }
+
+  .strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .frameless {
+    flex: 0 0 auto; width: 108px; height: 72px; padding: 0; cursor: pointer;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--stage); overflow: hidden;
+  }
+  .frameless.active { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .frameless svg, .frameless img { width: 100%; height: 100%; object-fit: cover; }
+
+  .titleblock {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--line-soft); overflow: hidden;
+  }
+  .cell { padding: 11px 13px 12px; background: var(--sheet); }
+  .cell.wide { grid-column: span 2; }
+  .cell .k {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--graphite); display: block; margin-bottom: 3px;
+  }
+  .cell .v { font-size: 14px; }
+  .cell .v.num { font-family: "IBM Plex Mono", monospace; }
+  .link { color: var(--blue); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--blue) 40%, transparent); }
+  .note { display: flex; gap: 10px; font-size: 13.5px; color: var(--graphite); padding: 14px 2px 0; line-height: 1.55; }
+  .note .k {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; flex: 0 0 auto; padding-top: 2px;
+  }
+
+  .ph-cat { fill: var(--graphite); font-family: "IBM Plex Sans KR", sans-serif; font-size: 30px; font-weight: 600; }
+  .ph-cap { fill: var(--graphite); font-family: "IBM Plex Sans KR", sans-serif; font-size: 15px; }
+  .ph-tag { fill: var(--graphite); font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; }
+  .pl-wall { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: miter; }
+  .pl-part { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+  .pl-label { fill: var(--graphite); font-family: "IBM Plex Mono", monospace; font-size: 14px; }
+  .pl-dimtext { fill: var(--blue); font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .pl-dim { stroke: var(--blue); stroke-width: 1; }
+
+  .msg { padding: 60px 24px; text-align: center; color: var(--graphite); font-size: 14px; }
+
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
+
+  /* ---- 모바일: 사이드바 → 슬라이드 오버레이 ---- */
+  @media (max-width: 860px) {
+    .menu { display: flex; }
+    .layout { display: block; }
+    .rail {
+      position: fixed; top: var(--bar-h); left: 0; z-index: 20;
+      width: 264px; max-width: 84vw; height: calc(100vh - var(--bar-h));
+      transform: translateX(-100%); transition: transform 0.2s ease;
+      border-right: 1px solid var(--line);
+      box-shadow: 4px 0 20px -6px rgba(0, 0, 0, 0.25);
+    }
+    .rail.open { transform: none; }
+    .main { max-width: 720px; }
+  }
+  @media (min-width: 861px) { .scrim { display: none; } }
+  @media (max-width: 640px) { .stage { padding: 8px 38px; height: min(52vh, 420px); min-height: 220px; } }
+  @media (max-width: 520px) { .titleblock { grid-template-columns: repeat(2, 1fr); } }
+  @media (prefers-reduced-motion: reduce) { .rail { transition: none; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .fade { animation: fade 0.2s ease both; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <form id="gateForm">
+    <div class="mark">Layout Index</div>
+    <h1>비밀번호를 입력하세요</h1>
+    <input id="gateInput" type="password" autocomplete="current-password" aria-label="비밀번호" autofocus />
+    <button type="submit">열기</button>
+    <div class="err" id="gateErr" aria-live="polite"></div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="bar">
+    <button class="menu" id="menuBtn" aria-label="현장 목록 열기" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="studio"><span id="studioName">스튜디오</span><small>Client reference</small></div>
+    <span class="cur" id="navCurrent"></span>
+  </header>
+
+  <div class="pdf-lightbox" id="pdfLightbox" hidden role="dialog" aria-modal="true" aria-label="PDF 크게 보기">
+    <div class="pdf-lb-bar">
+      <span class="pdf-lb-title" id="pdfLbTitle"></span>
+      <a id="pdfLbOpen" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
+      <button type="button" id="pdfLbClose">닫기 ✕</button>
+    </div>
+    <iframe id="pdfLbFrame" title="PDF 크게 보기"></iframe>
+  </div>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="layout">
+    <aside class="rail" id="rail" aria-label="현장 목록">
+      <div class="rail-search">
+        <input id="railSearch" type="search" placeholder="현장 이름·유형 검색" autocomplete="off" aria-label="현장 검색" />
+      </div>
+      <div class="rail-count" id="railCount"></div>
+      <div class="rail-list" id="railList"></div>
+      <div class="rail-foot"><a class="admin-link" href="/admin">⚙ 관리자</a> <button type="button" class="admin-link" id="logoutLink" style="background:none;border:0;cursor:pointer;float:right">로그아웃</button></div>
+    </aside>
+
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<script>
+const PLANS = {
+  threeRoom: `<svg viewBox="55 32 710 472" preserveAspectRatio="xMidYMid meet" role="img" aria-label="3룸 기본형 평면">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
+    <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
+    <text class="pl-dimtext" x="410" y="52" text-anchor="middle">12,600</text>
+    <rect x="90" y="80" width="640" height="400" fill="var(--sheet)"/>
+    <rect x="90" y="80" width="640" height="400" class="pl-wall"/>
+    <rect x="98" y="88" width="330" height="220" fill="color-mix(in srgb, var(--blue) 7%, var(--sheet))"/>
+    <rect x="428" y="88" width="180" height="150" fill="color-mix(in srgb, var(--amber) 9%, var(--sheet))"/>
+    <path class="pl-part" d="M428 80 V308 M90 308 H428 M608 80 V308 M428 238 H730 M300 308 V480 M520 308 V480"/>
+    <text class="pl-label" x="150" y="200">거실</text>
+    <text class="pl-label" x="470" y="170">주방·식당</text>
+    <text class="pl-label" x="650" y="170">현관</text>
+    <text class="pl-label" x="160" y="400">안방</text>
+    <text class="pl-label" x="380" y="400">욕실</text>
+    <text class="pl-label" x="600" y="400">침실 2</text>
+    <g transform="translate(690 430)"><circle r="15" class="pl-part"/><path class="pl-part" d="M0 -15 V15 M0 -15 L-5 -6 M0 -15 L5 -6"/><text class="pl-label" x="0" y="-22" text-anchor="middle">N</text></g>
+  </svg>`,
+  openLdk: `<svg viewBox="55 32 710 472" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LDK 통합형 평면">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <line class="pl-dim" x1="90" y1="60" x2="730" y2="60"/>
+    <line class="pl-dim" x1="90" y1="52" x2="90" y2="68"/><line class="pl-dim" x1="730" y1="52" x2="730" y2="68"/>
+    <text class="pl-dimtext" x="410" y="52" text-anchor="middle">13,100</text>
+    <rect x="90" y="80" width="640" height="400" fill="var(--sheet)"/>
+    <rect x="90" y="80" width="640" height="400" class="pl-wall"/>
+    <rect x="98" y="88" width="420" height="392" fill="color-mix(in srgb, var(--blue) 7%, var(--sheet))"/>
+    <path class="pl-part" d="M518 80 V320 M518 320 H730 M624 320 V480"/>
+    <path class="pl-part" d="M250 360 H518" stroke-dasharray="6 5"/>
+    <text class="pl-label" x="230" y="230">통합 LDK</text>
+    <text class="pl-label" x="230" y="430">서재·홈오피스</text>
+    <text class="pl-label" x="580" y="210">안방</text>
+    <text class="pl-label" x="648" y="410">드레스룸</text>
+    <g transform="translate(690 430)"><circle r="15" class="pl-part"/><path class="pl-part" d="M0 -15 V15 M0 -15 L-5 -6 M0 -15 L5 -6"/><text class="pl-label" x="0" y="-22" text-anchor="middle">N</text></g>
+  </svg>`
+};
+
+const STATUS = {
+  est:   { label: "견적",   cls: "est" },
+  plan:  { label: "계획",   cls: "plan" },
+  build: { label: "시공중", cls: "build" },
+  done:  { label: "완료",   cls: "done" }
+};
+
+/* 카테고리 표시 순서 — 이 순서대로 항상 정렬됨. 목록에 없는 카테고리는 뒤에 가나다 역순으로.
+   현장마다 매번 순서를 맞출 필요 없이, 카테고리 이름만 아래와 똑같이 붙이면 자동 정렬됨. */
+const CAT_ORDER = ["평면도", "실사", "메인컷", "현관", "주방", "주방발코니", "거실", "안방", "거실욕실", "안방욕실"];
+function catRank(c) { const i = CAT_ORDER.indexOf(c); return i === -1 ? null : i; }
+function sortByCat(images) {
+  return [...images].sort((a, b) => {
+    const ra = catRank(a.cat), rb = catRank(b.cat);
+    if (ra !== null && rb !== null) return ra - rb;
+    if (ra !== null) return -1;
+    if (rb !== null) return 1;
+    return String(b.cat || "").localeCompare(String(a.cat || ""), "ko");
+  });
+}
+
+const SKEY = "layout-index-unlocked";
+const gate = document.getElementById("gate");
+const app = document.getElementById("app");
+const rail = document.getElementById("rail");
+const scrim = document.getElementById("scrim");
+const menuBtn = document.getElementById("menuBtn");
+let DATA = null, PROJECTS = [];
+let pi = 0, ai = -1, cat = null, ii = 0, q = "";
+let compareMode = false, compareSel = [], compareCat = null, compareIdx = [];
+
+// 고객 링크(/s/<코드>)로 들어오면 그 현장 하나만, 아니면 사장님·직원 로그인
+const SHARE = (location.pathname.match(/^\/s\/([A-Za-z0-9_-]{16,64})\/?$/) || [])[1] || null;
+loadData();
+
+async function loadData() {
+  if (SHARE) {
+    document.body.classList.add("share");
+    try {
+      const res = await fetch("/api/share/" + SHARE, { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      DATA = await res.json();
+    } catch (e) {
+      gate.innerHTML = '<div class="msg">링크가 끝났거나 잘못된 링크예요.<br>담당자에게 새 링크를 요청해 주세요.</div>';
+      return;
+    }
+    setupData(); unlock(); return;
+  }
+  let staff = false;
+  try { staff = (await (await fetch("/api/me", { cache: "no-store" })).json()).staff; } catch (e) {}
+  if (staff) { await loadStaff(); return; }
+}
+// 로그인 폼은 페이지가 뜨자마자 받아둔다 (불러오는 중에 눌러도 새로고침되지 않게)
+document.getElementById("gateForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (SHARE) return;
+  const inp = document.getElementById("gateInput"), err = document.getElementById("gateErr");
+  err.textContent = "확인 중…";
+  try {
+    const r = await fetch("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: inp.value }) });
+    if (r.ok) { err.textContent = ""; await loadStaff(); return; }
+    err.textContent = "비밀번호가 맞지 않습니다.";
+  } catch (x) { err.textContent = "연결이 안 돼요. 잠시 뒤 다시 해 주세요."; }
+  inp.select();
+});
+async function loadStaff() {
+  try {
+    const res = await fetch("/api/projects", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    DATA = await res.json();
+  } catch (e) {
+    gate.innerHTML = '<div class="msg">현장 정보를 불러오지 못했어요.<br>새로고침해 주세요.</div>';
+    return;
+  }
+  setupData(); unlock();
+}
+function setupData() {
+  PROJECTS = DATA.projects || [];
+  PROJECTS.forEach((p) => (p.alts || []).forEach((alt) => { alt.images = sortByCat(alt.images || []); }));
+  if (PROJECTS.length) pi = railOrder()[0];
+  document.getElementById("studioName").textContent = DATA.studio || "스튜디오";
+}
+
+function unlock() {
+  gate.hidden = true;
+  app.hidden = false;
+  buildRail();
+  render();
+
+  const lo = document.getElementById("logoutLink");
+  if (lo) lo.addEventListener("click", async () => { try { await fetch("/api/logout", { method: "POST" }); } catch (e) {} location.href = "/"; });
+  menuBtn.addEventListener("click", () => toggleRail());
+  scrim.addEventListener("click", () => toggleRail(false));
+
+  const rs = document.getElementById("railSearch");
+  rs.addEventListener("input", () => { q = rs.value; buildRail(); });
+  rs.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); document.querySelector("#railList .item")?.click(); }
+  });
+
+  document.addEventListener("click", (e) => {
+    const z = e.target.closest(".pdf-zoom");
+    if (z) openPdf(z.dataset.pdf, z.dataset.title);
+  });
+  document.getElementById("pdfLbClose").addEventListener("click", closePdf);
+
+  document.addEventListener("keydown", (e) => {
+    const lbOpen = !document.getElementById("pdfLightbox").hidden;
+    if (e.key === "Escape") { if (lbOpen) closePdf(); else toggleRail(false); return; }
+    if (lbOpen) return;
+    if (e.target.matches("input, textarea") || ai === -1 || compareMode) return;
+    const list = filtered();
+    if (e.key === "ArrowLeft" && ii > 0) { ii--; render(); }
+    if (e.key === "ArrowRight" && ii < list.length - 1) { ii++; render(); }
+  });
+}
+
+function openPdf(src, title) {
+  document.getElementById("pdfLbTitle").textContent = title || "PDF";
+  document.getElementById("pdfLbOpen").href = src;
+  document.getElementById("pdfLbFrame").src = src + "#view=Fit";
+  document.getElementById("pdfLightbox").hidden = false;
+  document.body.style.overflow = "hidden";
+  document.getElementById("pdfLbClose").focus();
+}
+function closePdf() {
+  document.getElementById("pdfLightbox").hidden = true;
+  document.getElementById("pdfLbFrame").src = "about:blank";
+  document.body.style.overflow = "";
+}
+
+function toggleRail(open) {
+  const isMobile = window.matchMedia("(max-width: 860px)").matches;
+  if (!isMobile) return;
+  const show = open === undefined ? !rail.classList.contains("open") : open;
+  rail.classList.toggle("open", show);
+  scrim.hidden = !show;
+  menuBtn.setAttribute("aria-expanded", String(show));
+  if (show) setTimeout(() => document.getElementById("railSearch").focus(), 20);
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function isPdf(src) { return /\.pdf(\?|$)/i.test(src || ""); }
+
+function media(src, category, caption, aria) {
+  if (src && src.startsWith("plan:")) return PLANS[src.slice(5)] || placeholder(category, caption);
+  if (src && isPdf(src)) {
+    return `<div class="pdf-embed">` +
+      pdfImg(src, aria || caption) +
+      `<button type="button" class="pdf-zoom" data-pdf="${esc(src)}" data-title="${esc(caption || category || "PDF")}" aria-label="PDF 크게 보기"><span>크게 보기 ⤢</span></button>` +
+      `<a class="pdf-open" href="${esc(src)}" target="_blank" rel="noopener">새 탭 ↗</a>` +
+      `</div>`;
+  }
+  if (src) return `<img src="${esc(src)}" alt="${esc(aria || caption)}" loading="lazy" />`;
+  return placeholder(category, caption);
+}
+function placeholder(category, caption) {
+  return `<svg viewBox="42 34 736 492" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(category)} 이미지 자리">
+    <rect width="820" height="560" fill="var(--stage)"/>
+    <rect x="60" y="50" width="700" height="460" fill="var(--sheet)" stroke="var(--line)"/>
+    <text class="ph-cat" x="410" y="270" text-anchor="middle">${esc(category)}</text>
+    <text class="ph-cap" x="410" y="304" text-anchor="middle">${esc(caption)}</text>
+    <text class="ph-tag" x="410" y="474" text-anchor="middle">이미지 자리 · 실제 이미지로 교체</text>
+  </svg>`;
+}
+function pdfTile() {
+  return `<div class="pdf-thumb" aria-hidden="true">` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>` +
+    `<span>PDF</span></div>`;
+}
+function thumb(src, category, caption) {
+  if (src && isPdf(src)) return pdfImg(src, caption || "PDF");
+  return media(src, category, caption, caption);
+}
+
+/* PDF 첫 페이지를 이미지처럼 렌더링(pdf.js, 필요할 때만 CDN에서 로드) → 일반 이미지와 똑같은 크기·비율로 표시 */
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const pdfCache = new Map();
+const pdfPending = new Map();
+let pdfjsPromise = null;
+
+function pdfImg(src, alt) {
+  return `<img class="pdf-img" data-pdfsrc="${esc(src)}" alt="${esc(alt)}" src="${pdfCache.get(src) || BLANK_GIF}" />`;
+}
+function loadPdfJs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = PDFJS_URL;
+      s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; resolve(window.pdfjsLib); };
+      s.onerror = () => { pdfjsPromise = null; reject(new Error("pdf.js load failed")); };
+      document.head.appendChild(s);
+    });
+  }
+  return pdfjsPromise;
+}
+function renderPdfFirstPage(src) {
+  if (pdfCache.has(src)) return Promise.resolve(pdfCache.get(src));
+  if (pdfPending.has(src)) return pdfPending.get(src);
+  const p = (async () => {
+    const lib = await loadPdfJs();
+    const doc = await lib.getDocument(src).promise;
+    const page = await doc.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: Math.min(4, 1800 / base.width) });
+    const c = document.createElement("canvas");
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const url = c.toDataURL("image/jpeg", 0.88);
+    pdfCache.set(src, url);
+    return url;
+  })();
+  pdfPending.set(src, p);
+  p.finally(() => pdfPending.delete(src)).catch(() => {});
+  return p;
+}
+function hydratePdfs() {
+  const bySrc = (src) => [...document.querySelectorAll("img[data-pdfsrc]")].filter((i) => i.dataset.pdfsrc === src);
+  document.querySelectorAll("img[data-pdfsrc]").forEach((img) => {
+    const src = img.dataset.pdfsrc;
+    if (pdfCache.has(src)) { img.src = pdfCache.get(src); return; }
+    renderPdfFirstPage(src)
+      .then((url) => bySrc(src).forEach((i) => { i.src = url; }))
+      .catch(() => bySrc(src).forEach((i) => {
+        const t = document.createElement("div");
+        t.innerHTML = pdfTile();
+        i.replaceWith(t.firstChild);
+      }));
+  });
+}
+
+// 같은 단지끼리 모이게: 이름에서 동·차·평형 등 숫자가 나오기 전까지를 단지 이름으로 본다.
+// (대소문자·띄어쓰기·괄호 무시 → "연동e편한세상 106동"과 "연동E편한세상 2차"가 같은 무리)
+function complexKey(name) {
+  const s = String(name || "").toLowerCase().replace(/\(.*?\)/g, "").replace(/\s+/g, "");
+  const m = s.match(/^[^0-9]+/);
+  return m ? m[0] : s;
+}
+function railOrder() {
+  return PROJECTS
+    .map((p, i) => ({ i, k: complexKey(p.name) }))
+    .sort((a, b) => a.k.localeCompare(b.k, "ko") || a.i - b.i)
+    .map((x) => x.i);
+}
+function displayNo(i) { return railOrder().indexOf(i) + 1; }
+
+function buildRail() {
+  const railList = document.getElementById("railList");
+  const railCount = document.getElementById("railCount");
+  railList.innerHTML = "";
+  const needle = q.trim().toLowerCase();
+  const rows = railOrder()
+    .map((i) => ({ p: PROJECTS[i], i }))
+    .filter(({ p }) => !needle
+      || (p.name || "").toLowerCase().includes(needle)
+      || (p.type || "").toLowerCase().includes(needle));
+
+  railCount.textContent = needle ? `${rows.length} / ${PROJECTS.length} 현장` : `현장 ${PROJECTS.length}`;
+
+  if (!rows.length) {
+    railList.innerHTML = '<div class="rail-empty">검색 결과가 없습니다</div>';
+    return;
+  }
+  rows.forEach(({ p, i }) => {
+    const s = STATUS[p.status] || STATUS.plan;
+    const b = document.createElement("button");
+    b.className = "item" + (i === pi ? " active" : "");
+    b.dataset.pi = String(i);
+    b.title = `${p.name} · ${s.label}${p.type ? " · " + p.type : ""}`;
+    b.innerHTML =
+      `<span class="idx">${String(displayNo(i)).padStart(2, "0")}</span>` +
+      `<span class="t">${esc(p.name)}</span>` +
+      `<span class="dot ${s.cls}"></span>`;
+    b.addEventListener("click", () => {
+      pi = i; ai = -1; cat = null; ii = 0;
+      compareMode = false; compareSel = []; compareCat = null; compareIdx = [];
+      toggleRail(false); render();
+    });
+    railList.appendChild(b);
+  });
+}
+
+/* ai: -1 = 도면정보, -2 = 현장사진 폴더, 0.. = 도면안 */
+function curAlt() {
+  const p = PROJECTS[pi];
+  if (ai === -2) return { images: (p.photos || []).map((ph) => ({ cat: "현장사진", caption: ph.caption || "", src: ph.src })) };
+  return p.alts[ai];
+}
+function filtered() {
+  const alt = curAlt();
+  return cat ? alt.images.filter((x) => x.cat === cat) : alt.images;
+}
+
+function render() {
+  const main = document.getElementById("main");
+  const p = PROJECTS[pi];
+  if (compareMode && (!p.alts || p.alts.length < 2)) compareMode = false;
+  if (ai === -2 && !(p.photos && p.photos.length)) ai = -1;
+  document.getElementById("navCurrent").textContent = p.name;
+  document.querySelectorAll(".item").forEach((el) => {
+    el.classList.toggle("active", Number(el.dataset.pi) === pi);
+  });
+
+  const metaLine = Object.values(p.meta || {}).slice(0, 3).join("  ·  ");
+  let html =
+    `<div class="fade">` +
+    `<div class="eyebrow">${String(displayNo(pi)).padStart(2, "0")} /${String(PROJECTS.length).padStart(2, "0")}${p.type ? " · " + esc(p.type) : ""}</div>` +
+    `<h1 class="title">${esc(p.name)}</h1>` +
+    `<div class="subline">${esc(metaLine)}</div>`;
+
+  const coverSrc = p.cover && p.cover.src ? p.cover.src : "";
+  const canCompare = (p.alts || []).length >= 2;
+  if (canCompare) {
+    html += `<div class="cmpbar">` +
+      `<button class="cmp-toggle${compareMode ? " active" : ""}" id="cmpToggle" type="button">` +
+        (compareMode ? "비교 종료" : "도면안 비교") +
+      `</button>` +
+      (compareMode ? `<span class="cmp-hint">비교할 도면안 2개를 선택하세요 (${compareSel.length}/2)</span>` : "") +
+      `</div>`;
+  }
+
+  html += `<div class="alts">`;
+  html += `<button class="alt${!compareMode && ai === -1 ? " active" : ""}${compareMode ? " alt-disabled" : ""}" data-a="-1">` +
+    `<span class="thumb">${coverSrc
+      ? thumb(coverSrc, "도면정보", "도면정보")
+      : `<svg viewBox="0 0 128 84"><rect width="128" height="84" fill="var(--sheet)"/>` +
+        `<rect x="26" y="16" width="76" height="52" fill="none" stroke="var(--ink)" stroke-width="2"/>` +
+        `<path d="M64 16v52M26 42h76" stroke="var(--ink)" stroke-width="1"/></svg>`}</span>` +
+    `<span class="lbl">도면정보</span></button>`;
+  (p.alts || []).forEach((alt, i) => {
+    const first = alt.images[0] || { src: "", cat: "", caption: alt.code };
+    const activeSingle = !compareMode && ai === i;
+    const selectedCmp = compareMode && compareSel.includes(i);
+    html += `<button class="alt${activeSingle ? " active" : ""}${selectedCmp ? " cmp-selected" : ""}" data-a="${i}">` +
+      `<span class="thumb">${thumb(first.src, first.cat, alt.code)}</span>` +
+      `<span class="lbl">${esc(alt.code)}<small>${esc(alt.title || "")}</small></span></button>`;
+  });
+  const photos = p.photos || [];
+  if (photos.length) {
+    html += `<button class="alt${!compareMode && ai === -2 ? " active" : ""}${compareMode ? " alt-disabled" : ""}" data-a="-2">` +
+      `<span class="thumb">${thumb(photos[0].src, "현장사진", "현장사진")}` +
+      `<span class="folder-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>${photos.length}</span></span>` +
+      `<span class="lbl">현장사진<small>${photos.length}장</small></span></button>`;
+  }
+  html += `</div>`;
+
+  if (compareMode) {
+    html += renderCompareBlock(p);
+    main.innerHTML = html + `</div>`;
+    bindAlts();
+    return;
+  }
+
+  if (ai === -1) {
+    if (coverSrc) {
+      html += `<div class="stage" style="margin-bottom:16px">` +
+        `<div class="frame">${media(coverSrc, "도면", (p.cover && p.cover.caption) || "전체 도면")}</div></div>`;
+      if (p.cover && p.cover.caption) {
+        html += `<div class="caption" style="margin:-6px 2px 16px"><b>전체 도면</b> &nbsp;${esc(p.cover.caption)}</div>`;
+      }
+    }
+    html += `<div class="titleblock">` +
+      Object.entries(p.meta || {}).map(([k, v], idx) =>
+        `<div class="cell${idx === 0 ? " wide" : ""}"><span class="k">${esc(k)}</span><span class="v num">${esc(v)}</span></div>`
+      ).join("") +
+      (p.cad ? `<div class="cell wide"><span class="k">원본 CAD</span><a class="link" href="https://${esc(p.cad)}" target="_blank" rel="noopener">${esc(p.cad)} ↗</a></div>` : "") +
+      `</div>` +
+      (p.note ? `<div class="note"><span class="k">Note</span><span>${esc(p.note)}</span></div>` : "");
+    main.innerHTML = html + `</div>`;
+    bindAlts();
+    return;
+  }
+
+  const alt = curAlt();
+  const list = filtered();
+  if (ii >= list.length) ii = 0;
+  const cur = list[ii] || { src: "", cat: "", caption: "" };
+
+  html += `<div class="stage">` +
+    `<button class="nav prev" id="prev" aria-label="이전" ${ii === 0 ? "disabled" : ""}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>` +
+    `<div class="frame">${media(cur.src, cur.cat, cur.caption)}</div>` +
+    `<button class="nav next" id="next" aria-label="다음" ${ii >= list.length - 1 ? "disabled" : ""}>` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>` +
+    `<span class="counter">${ii + 1} / ${list.length}</span>` +
+    `</div>` +
+    `<div class="caption"><b>${esc(cur.cat)}</b> &nbsp;${esc(cur.caption)}</div>`;
+
+  if (ai !== -2) {
+    const cats = [...new Set(alt.images.map((x) => x.cat))];
+    html += `<div class="cats"><button class="cat${cat === null ? " active" : ""}" data-c="">전체</button>`;
+    cats.forEach((c) => { html += `<button class="cat${cat === c ? " active" : ""}" data-c="${esc(c)}">${esc(c)}</button>`; });
+    html += `</div>`;
+  } else {
+    html += `<div style="height:14px"></div>`;
+  }
+
+  html += `<div class="strip">`;
+  list.forEach((im, i) => {
+    html += `<button class="frameless${i === ii ? " active" : ""}" data-i="${i}" aria-label="${esc(im.caption)}">${thumb(im.src, im.cat, im.caption)}</button>`;
+  });
+  html += `</div>`;
+
+  main.innerHTML = html + `</div>`;
+
+  bindAlts();
+  document.getElementById("prev")?.addEventListener("click", () => { if (ii > 0) { ii--; render(); } });
+  document.getElementById("next")?.addEventListener("click", () => { if (ii < list.length - 1) { ii++; render(); } });
+  main.querySelectorAll(".cat").forEach((el) => el.addEventListener("click", () => { cat = el.dataset.c || null; ii = 0; render(); }));
+  main.querySelectorAll(".frameless").forEach((el) => el.addEventListener("click", () => { ii = Number(el.dataset.i); render(); }));
+}
+
+function toggleCompareMode() {
+  const p = PROJECTS[pi];
+  if (!compareMode) {
+    compareMode = true;
+    compareSel = (p.alts || []).map((_, i) => i).slice(0, 2);
+    compareCat = null;
+    compareIdx = compareSel.map(() => 0);
+  } else {
+    compareMode = false;
+  }
+  render();
+}
+
+function renderCompareBlock(p) {
+  const alts = compareSel.map((i) => p.alts[i]).filter(Boolean);
+  if (alts.length < 2) {
+    return `<div class="rail-empty" style="padding:40px 12px">위에서 도면안을 2개 선택하면 나란히 비교됩니다.</div>`;
+  }
+  const allImgs = [].concat(...alts.map((a) => a.images || []));
+  const catsOrdered = [...new Set(sortByCat(allImgs).map((x) => x.cat))];
+
+  let html = `<div class="cats"><button class="cat${compareCat === null ? " active" : ""}" data-cc="">전체</button>`;
+  catsOrdered.forEach((c) => { html += `<button class="cat${compareCat === c ? " active" : ""}" data-cc="${esc(c)}">${esc(c)}</button>`; });
+  html += `</div><div class="cmp-grid">`;
+
+  alts.forEach((alt, side) => {
+    const list = compareCat ? alt.images.filter((x) => x.cat === compareCat) : alt.images;
+    let idx = compareIdx[side] || 0;
+    if (idx >= list.length) idx = 0;
+    compareIdx[side] = idx;
+    const cur = list[idx];
+    html += `<div class="cmp-col">` +
+      `<div class="cmp-label">${esc(alt.code)}${alt.title ? " · " + esc(alt.title) : ""}</div>` +
+      `<div class="stage">` +
+      (list.length ? `<button class="nav prev" data-cmpnav="prev" data-side="${side}" aria-label="이전" ${idx === 0 ? "disabled" : ""}>` +
+        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>` : "") +
+      `<div class="frame">${list.length ? media(cur.src, cur.cat, cur.caption) : placeholder(compareCat || "카테고리", "이 도면안엔 없음")}</div>` +
+      (list.length ? `<button class="nav next" data-cmpnav="next" data-side="${side}" aria-label="다음" ${idx >= list.length - 1 ? "disabled" : ""}>` +
+        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>` : "") +
+      (list.length ? `<span class="counter">${idx + 1} / ${list.length}</span>` : "") +
+      `</div>` +
+      `<div class="caption">${list.length ? `<b>${esc(cur.cat)}</b> &nbsp;${esc(cur.caption)}` : "이 카테고리 이미지가 없습니다"}</div>` +
+      `</div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function bindAlts() {
+  document.querySelectorAll(".alt").forEach((el) => el.addEventListener("click", () => {
+    const i = Number(el.dataset.a);
+    if (compareMode) {
+      if (i < 0) return;
+      const pos = compareSel.indexOf(i);
+      if (pos !== -1) { if (compareSel.length > 1) compareSel.splice(pos, 1); }
+      else { if (compareSel.length >= 2) compareSel.shift(); compareSel.push(i); }
+      compareCat = null; compareIdx = compareSel.map(() => 0);
+      render();
+      return;
+    }
+    ai = i; cat = null; ii = 0; render();
+  }));
+  document.getElementById("cmpToggle")?.addEventListener("click", toggleCompareMode);
+  document.querySelectorAll("[data-cc]").forEach((el) => el.addEventListener("click", () => {
+    compareCat = el.dataset.cc || null; compareIdx = compareSel.map(() => 0); render();
+  }));
+  document.querySelectorAll("[data-cmpnav]").forEach((el) => el.addEventListener("click", () => {
+    const side = Number(el.dataset.side);
+    compareIdx[side] = (compareIdx[side] || 0) + (el.dataset.cmpnav === "next" ? 1 : -1);
+    render();
+  }));
+  hydratePdfs();
+}
+</script>
+</body>
+</html>

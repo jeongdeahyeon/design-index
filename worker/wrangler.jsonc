@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // 레이아웃 도면 인덱스 (비공개) — 사장님·직원 로그인 + 고객별 링크
+  "name": "design-index",
+  "main": "src/index.js",
+  "compatibility_date": "2025-05-01",
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "r2_buckets": [
+    { "binding": "FILES", "bucket_name": "design-index-files" }
+  ],
+  "observability": { "enabled": true }
+  // 비밀값(wrangler secret put): STAFF_PASSWORD (사장님·직원 공용 비밀번호), SESSION_SECRET (긴 랜덤 문자열)
+}
