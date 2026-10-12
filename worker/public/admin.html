@@ -354,8 +354,6 @@ function renderEditor() {
       <button class="mini danger" id="delProject">이 현장 삭제</button>
     </div>
 
-    <div class="sec" id="shareSec"></div>
-
     <div class="sec">
       <h3>속성 <span class="tag">도면정보 탭에 표로 표시</span></h3>
       <div id="kvList"></div>
@@ -387,42 +385,10 @@ function renderEditor() {
     data.projects.splice(sel, 1); sel = Math.max(0, sel - 1); markDirty(); renderList(); renderEditor();
   };
 
-  renderShare(p);
   renderKv(p);
   renderCover(p);
   renderPhotos(p);
   renderAlts(p);
-}
-
-/* ---------- 고객 링크: 이 현장만 보이는 전용 주소 ---------- */
-function newCode() {
-  const b = new Uint8Array(18); crypto.getRandomValues(b);
-  return btoa(String.fromCharCode(...b)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function renderShare(p) {
-  const box = $("shareSec");
-  const on = p.share && p.share.code && p.share.on !== false;
-  const url = on ? location.origin + "/s/" + p.share.code : "";
-  box.innerHTML = '<h3>고객 링크 <span class="tag">이 현장만 보이는 주소 · 로그인 없이 열림</span></h3>' +
-    (on ? '<div class="field"><input id="shareUrl" readonly value="' + escapeAttr(url) + '" /></div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-        '<button class="mini primary" id="shareCopy">링크 복사</button>' +
-        '<button class="mini" id="shareOpen">열어보기 ↗</button>' +
-        '<button class="mini" id="shareNew">새 링크로 바꾸기</button>' +
-        '<button class="mini danger" id="shareOff">링크 끄기</button></div>' +
-      '<p class="hint" style="margin:8px 0 0">' + (p.share.made ? "만든 날 " + escapeHtml(p.share.made) + " · " : "") + '링크를 끄거나 바꾸면 예전 링크는 바로 안 열려요. 저장돼야 적용돼요.</p>'
-    : '<button class="mini primary" id="shareMake">고객 링크 만들기</button>' +
-      '<p class="hint" style="margin:8px 0 0">만들면 고객에게 카톡으로 보낼 수 있는 주소가 생겨요. 다른 현장은 보이지 않아요.</p>');
-  const today = new Date().toISOString().slice(0, 10);
-  const make = () => { p.share = { code: newCode(), on: true, made: today }; markDirty(); renderShare(p); };
-  if ($("shareMake")) $("shareMake").onclick = make;
-  if ($("shareNew")) $("shareNew").onclick = () => { if (confirm("새 링크로 바꿀까요? 예전 링크는 더 이상 안 열려요.")) make(); };
-  if ($("shareOff")) $("shareOff").onclick = () => { if (confirm("링크를 끌까요? 고객이 더 이상 볼 수 없어요.")) { p.share.on = false; markDirty(); renderShare(p); } };
-  if ($("shareOpen")) $("shareOpen").onclick = () => window.open(url, "_blank");
-  if ($("shareCopy")) $("shareCopy").onclick = async () => {
-    try { await navigator.clipboard.writeText(url); setState("링크 복사됨" + (dirty ? " · 저장되면 열려요" : ""), dirty ? "dirty" : "saved"); }
-    catch { $("shareUrl").select(); setState("Ctrl+C 로 복사하세요", "dirty"); }
-  };
 }
 
 /* ---------- 현장사진 ---------- */

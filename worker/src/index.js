@@ -1,7 +1,7 @@
 // 레이아웃 도면 인덱스 — 비공개 서버 (Cloudflare Worker + R2)
 //
 //  · 사장님·직원: STAFF_PASSWORD 로 로그인 → 전체 현장 보기·편집 (쿠키 30일)
-//  · 고객: /s/<코드> 링크 → 그 현장의 데이터·사진만 보임 (코드는 관리자에서 만들고 끔)
+//  · 상담용 내부 도구 — 고객에게 주는 링크 없음 (고객용 공유는 dh_manager에서)
 //  · 데이터: R2 "data/projects.json", 사진·도면: R2 "images/<파일명>"
 //  · 사진·도면은 공개 주소가 없음. 모든 요청이 여기서 로그인·링크를 확인한 뒤에만 나감.
 
@@ -48,29 +48,6 @@ async function loadProjects(env) {
   return { data: JSON.parse(await obj.text()), etag: obj.etag };
 }
 
-// 현장 하나가 쓰는 파일 경로 목록 (도면정보·도면안·현장사진)
-function projectSrcs(p) {
-  const out = [];
-  if (p.cover && p.cover.src) out.push(p.cover.src);
-  (p.alts || []).forEach((a) => (a.images || []).forEach((im) => im.src && out.push(im.src)));
-  (p.photos || []).forEach((ph) => ph.src && out.push(ph.src));
-  return out;
-}
-function findShared(data, code) {
-  if (!/^[A-Za-z0-9_-]{16,64}$/.test(code || "")) return null;
-  return (data.projects || []).find((p) => p.share && p.share.on !== false && same(p.share.code || "", code)) || null;
-}
-// 고객용: 관리용 정보는 빼고, 사진 주소는 링크 전용 경로로
-function forCustomer(p, code) {
-  const fix = (src) => (src && src.startsWith("images/") ? `/s/${code}/${src}` : src);
-  const q = JSON.parse(JSON.stringify(p));
-  delete q.share; delete q.cad;
-  if (q.cover && q.cover.src) q.cover.src = fix(q.cover.src);
-  (q.alts || []).forEach((a) => (a.images || []).forEach((im) => { im.src = fix(im.src); }));
-  (q.photos || []).forEach((ph) => { ph.src = fix(ph.src); });
-  return q;
-}
-
 async function serveFile(env, key, req) {
   const obj = await env.FILES.get(key, { range: req.headers, onlyIf: req.headers });
   if (!obj) return new Response("Not found", { status: 404 });
@@ -105,29 +82,6 @@ export default {
       return json({ ok: true }, 200, { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
     }
     if (path === "/api/me") return json({ staff: await isStaff(req, env) });
-
-    /* ---- 고객 링크 ---- */
-    let sm = path.match(/^\/s\/([A-Za-z0-9_-]+)\/?$/);
-    if (sm && m === "GET") {
-      const res = await page(env, req, "/");
-      const r = new Response(res.body, res);
-      r.headers.set("x-robots-tag", "noindex"); r.headers.set("cache-control", "no-store");
-      return r;
-    }
-    sm = path.match(/^\/api\/share\/([A-Za-z0-9_-]+)$/);
-    if (sm && m === "GET") {
-      const { data } = await loadProjects(env);
-      const p = findShared(data, sm[1]);
-      if (!p) return json({ ok: false }, 404);
-      return json({ studio: data.studio || "", share: true, projects: [forCustomer(p, sm[1])] });
-    }
-    sm = path.match(/^\/s\/([A-Za-z0-9_-]+)\/(images\/[A-Za-z0-9._-]+)$/);
-    if (sm && (m === "GET" || m === "HEAD")) {
-      const { data } = await loadProjects(env);
-      const p = findShared(data, sm[1]);
-      if (!p || !projectSrcs(p).includes(sm[2])) return new Response("Not found", { status: 404 });
-      return serveFile(env, sm[2], req);
-    }
 
     /* ---- 여기부터 사장님·직원 전용 ---- */
     if (path.startsWith("/api/") || path.startsWith("/images/")) {
